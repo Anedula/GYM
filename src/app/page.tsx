@@ -1,13 +1,17 @@
+
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart } from "recharts";
-import { Users, TrendingUp, Clock, DollarSign, PlusCircle, ArrowRight } from "lucide-react";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { Users, TrendingUp, Clock, DollarSign, PlusCircle, Info } from "lucide-react"; // Changed ArrowRight to Info
 import Link from "next/link";
 import type { ChartConfig } from "@/components/ui/chart";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 const chartData = [
   { month: "Enero", revenue: 1860 },
@@ -25,13 +29,28 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const expiringMembers = [
+interface ExpiringMember {
+  id: string;
+  name: string;
+  expiryDate: string;
+  plan: string;
+}
+
+const expiringMembers: ExpiringMember[] = [
   { id: "1", name: "Ana Pérez", expiryDate: "2024-08-05", plan: "Premium" },
   { id: "2", name: "Luis García", expiryDate: "2024-08-10", plan: "Básico" },
   { id: "3", name: "Sofía López", expiryDate: "2024-08-12", plan: "Premium" },
 ];
 
 export default function DashboardPage() {
+  const [selectedMember, setSelectedMember] = useState<ExpiringMember | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
+  const handleViewDetails = (member: ExpiringMember) => {
+    setSelectedMember(member);
+    setIsDetailDialogOpen(true);
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -133,10 +152,8 @@ export default function DashboardPage() {
                   <TableCell>{member.plan}</TableCell>
                   <TableCell>{member.expiryDate}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/clientes/${member.id}`}>
-                        Ver Detalles <ArrowRight className="ml-2 h-3 w-3" />
-                      </Link>
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetails(member)}>
+                      Ver Detalles <Info className="ml-2 h-3 w-3" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -145,6 +162,34 @@ export default function DashboardPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {selectedMember && (
+        <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Detalles del Miembro</DialogTitle>
+              <DialogDescription>
+                Información detallada del miembro seleccionado.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="detail-name" className="text-right col-span-1">Nombre</Label>
+                <p id="detail-name" className="col-span-3 font-medium">{selectedMember.name}</p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="detail-plan" className="text-right col-span-1">Plan</Label>
+                <p id="detail-plan" className="col-span-3">{selectedMember.plan}</p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="detail-expiry" className="text-right col-span-1">Vence</Label>
+                <p id="detail-expiry" className="col-span-3">{selectedMember.expiryDate}</p>
+              </div>
+            </div>
+            {/* You can add DialogFooter with a close button if needed, but the X icon is usually enough */}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
