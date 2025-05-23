@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -9,7 +10,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuChe
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, Search, Filter, UserX, UserCheck, UserRoundClock } from "lucide-react";
+import { PlusCircle, Search, Filter, UserX, UserCheck, Hourglass } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface Client {
@@ -34,7 +35,7 @@ const mockClients: Client[] = [
 const statusIcons: Record<Client["membershipStatus"], LucideIcon> = {
   activo: UserCheck,
   expirado: UserX,
-  pendiente: UserRoundClock,
+  pendiente: Hourglass,
 };
 
 const statusColors: Record<Client["membershipStatus"], string> = {
@@ -64,20 +65,22 @@ export default function ClientesPage() {
     setStatusFilter(prev => ({ ...prev, [status]: !prev[status] }));
   };
   
-  // Dummy submit handler
   const handleAddClientSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // In a real app, you would handle form submission here
-    // For example, get form data and call an API
+    // En una aplicación real, aquí manejarías el envío del formulario
+    // Por ejemplo, obtener datos del formulario y llamar a una API
     const formData = new FormData(event.currentTarget);
     const newClient = {
       name: formData.get('name'),
       email: formData.get('email'),
       plan: formData.get('plan'),
+      // Aquí podrías añadir más lógica como generar un ID, añadir a mockClients, etc.
     };
-    console.log("New client data:", newClient);
-    setIsAddClientDialogOpen(false); // Close dialog after submission
-    // Potentially add to mockClients or re-fetch
+    console.log("Nuevos datos del cliente:", newClient);
+    // Aquí podrías añadir el nuevo cliente a la lista 'mockClients' o recargar los datos
+    // Por ahora, solo cerramos el diálogo y mostramos un mensaje.
+    alert(`Cliente "${newClient.name}" añadido (simulación).`);
+    setIsAddClientDialogOpen(false); 
   };
 
 
@@ -112,8 +115,9 @@ export default function ClientesPage() {
                     key={status}
                     checked={statusFilter[status as Client["membershipStatus"]]}
                     onCheckedChange={() => handleStatusFilterChange(status as Client["membershipStatus"])}
+                    className="capitalize"
                   >
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                    {status}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuContent>
@@ -151,9 +155,11 @@ export default function ClientesPage() {
                           <SelectItem value="basico">Básico</SelectItem>
                           <SelectItem value="premium">Premium</SelectItem>
                           <SelectItem value="anual">Anual</SelectItem>
+                          <SelectItem value="mensual">Mensual</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
+                    {/* Podrías añadir más campos aquí, como fecha de inicio de membresía, etc. */}
                   </div>
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setIsAddClientDialogOpen(false)}>Cancelar</Button>
@@ -187,7 +193,7 @@ export default function ClientesPage() {
                         <TableCell>
                           <span className={`flex items-center ${statusColors[client.membershipStatus]}`}>
                             <StatusIcon className="mr-1.5 h-4 w-4" />
-                            {client.membershipStatus.charAt(0).toUpperCase() + client.membershipStatus.slice(1)}
+                            <span className="capitalize">{client.membershipStatus}</span>
                           </span>
                         </TableCell>
                         <TableCell>{client.plan}</TableCell>
@@ -199,7 +205,7 @@ export default function ClientesPage() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-                      No se encontraron clientes.
+                      No se encontraron clientes que coincidan con tu búsqueda o filtros.
                     </TableCell>
                   </TableRow>
                 )}
@@ -211,3 +217,5 @@ export default function ClientesPage() {
     </div>
   );
 }
+
+    
