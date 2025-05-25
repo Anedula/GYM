@@ -68,19 +68,16 @@ export default function ClientesPage() {
 
   const handleAddClientSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // En una aplicación real, aquí manejarías el envío del formulario
-    // Por ejemplo, obtener datos del formulario y llamar a una API
     const formData = new FormData(event.currentTarget);
     const newClient = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      // plan: formData.get('plan'), // Campo de plan eliminado del formulario
-      // Aquí podrías añadir más lógica como generar un ID, añadir a mockClients, etc.
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      plan: formData.get('plan') as string,
     };
     console.log("Nuevos datos del cliente:", newClient);
-    // Aquí podrías añadir el nuevo cliente a la lista 'mockClients' o recargar los datos
-    // Por ahora, solo cerramos el diálogo y mostramos un mensaje.
-    alert(`Cliente "${newClient.name}" añadido (simulación). El plan se asignará por separado.`);
+    // Here you would typically add the new client to your state or send to an API
+    // For now, just an alert and close dialog
+    alert(`Cliente "${newClient.name}" añadido con plan "${newClient.plan}" (simulación).`);
     setIsAddClientDialogOpen(false);
   };
 
@@ -146,7 +143,6 @@ export default function ClientesPage() {
                       <Label htmlFor="email" className="text-right">Email</Label>
                       <Input id="email" name="email" type="email" className="col-span-3" required />
                     </div>
-                    {/*
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="plan" className="text-right">Plan</Label>
                       <Select name="plan" required>
@@ -161,7 +157,6 @@ export default function ClientesPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    */}
                     {/* Podrías añadir más campos aquí, como fecha de inicio de membresía, etc. */}
                   </div>
                   <DialogFooter>

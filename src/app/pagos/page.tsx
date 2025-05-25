@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -38,6 +39,8 @@ interface ClientStub {
   name: string;
 }
 
+// mockPlans is defined here but not directly used in this version of the form.
+// It might be used for displaying plan details or if plan selection is re-introduced.
 const mockPlans: MembershipPlan[] = [
   { id: "1", name: "Básico Mensual", price: 30, duration: "1 mes", description: "Acceso a todas las áreas, sin clases." },
   { id: "2", name: "Premium Mensual", price: 50, duration: "1 mes", description: "Acceso total, incluye clases grupales." },
@@ -65,16 +68,24 @@ export default function PagosPage() {
   const handlePaymentFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+    const selectedClient = mockClientsForPayment.find(c => c.id === formData.get('client'));
+    
     const paymentData = {
       clientId: formData.get('client'),
-      planId: formData.get('plan'),
+      clientName: selectedClient?.name, // For the toast message
       paymentDate: paymentDate,
+      // Plan is no longer selected in this form.
+      // In a real app, you would determine the plan based on the client or other logic.
     };
-    console.log("Payment data:", paymentData);
-    // In a real app, you would also calculate expiryDate based on plan duration
-    // and add the new payment to the mockPayments array or save to a backend.
-    toast({ title: "Pago Registrado", description: `El pago ha sido registrado exitosamente.` });
+    console.log("Payment data (Plan not selected in form):", paymentData);
+    
+    toast({ 
+      title: "Pago Registrado", 
+      description: `El pago para ${paymentData.clientName || 'el cliente seleccionado'} ha sido registrado con fecha ${paymentDate ? format(paymentDate, "PPP", {locale: es}) : 'N/A'}.` 
+    });
     setIsPaymentDialogOpen(false);
+    // Reset date for next entry
+    setPaymentDate(new Date()); 
   };
 
   const sendReminder = (payment: PaymentRecord) => {
@@ -92,7 +103,11 @@ export default function PagosPage() {
             <CardTitle>Control de Pagos</CardTitle>
             <CardDescription>Registra pagos y visualiza vencimientos.</CardDescription>
           </div>
-          <Button onClick={() => setIsPaymentDialogOpen(true)}>
+          <Button onClick={() => {
+            setPaymentDate(new Date()); // Reset date when opening dialog
+            setIsPaymentDialogOpen(true);
+            }}
+          >
             <DollarSign className="mr-2 h-4 w-4" /> Registrar Pago
           </Button>
         </CardHeader>
@@ -140,7 +155,7 @@ export default function PagosPage() {
           <DialogHeader>
             <DialogTitle>Registrar Pago</DialogTitle>
             <DialogDescription>
-              Selecciona el cliente, el plan y la fecha del pago.
+              Selecciona el cliente y la fecha del pago.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handlePaymentFormSubmit}>
@@ -158,19 +173,7 @@ export default function PagosPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="payment-plan" className="text-right">Plan</Label>
-                <Select name="plan" required>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Selecciona un plan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockPlans.map(plan => (
-                      <SelectItem key={plan.id} value={plan.id}>{plan.name} (${plan.price})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Plan selection removed from here */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="payment-date" className="text-right">Fecha de Pago</Label>
                 <Popover>
@@ -190,6 +193,7 @@ export default function PagosPage() {
                       onSelect={setPaymentDate}
                       initialFocus
                       locale={es}
+                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                     />
                   </PopoverContent>
                 </Popover>
