@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, CreditCard, CalendarDays, BarChart3, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, CalendarDays, BarChart3, Settings, ReceiptText } from 'lucide-react';
 
 export interface NavItem {
   title: string;
@@ -19,6 +19,11 @@ export const navItems: NavItem[] = [
     title: 'Clientes',
     href: '/clientes',
     icon: Users,
+  },
+  {
+    title: 'Pagos',
+    href: '/pagos',
+    icon: ReceiptText,
   },
   {
     title: 'Membresías',
