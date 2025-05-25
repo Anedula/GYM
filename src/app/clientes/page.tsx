@@ -9,7 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Search, Filter, UserX, UserCheck, Hourglass } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -73,13 +72,13 @@ export default function ClientesPage() {
     const newClient = {
       name: formData.get('name'),
       email: formData.get('email'),
-      plan: formData.get('plan'),
+      // plan: formData.get('plan'), // Campo de plan eliminado del formulario
       // Aquí podrías añadir más lógica como generar un ID, añadir a mockClients, etc.
     };
     console.log("Nuevos datos del cliente:", newClient);
     // Aquí podrías añadir el nuevo cliente a la lista 'mockClients' o recargar los datos
     // Por ahora, solo cerramos el diálogo y mostramos un mensaje.
-    alert(`Cliente "${newClient.name}" añadido (simulación).`);
+    alert(`Cliente "${newClient.name}" añadido (simulación). El plan se asignará por separado.`);
     setIsAddClientDialogOpen(false); 
   };
 
@@ -145,6 +144,7 @@ export default function ClientesPage() {
                       <Label htmlFor="email" className="text-right">Email</Label>
                       <Input id="email" name="email" type="email" className="col-span-3" required />
                     </div>
+                    {/* 
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="plan" className="text-right">Plan</Label>
                       <Select name="plan" required>
@@ -159,6 +159,7 @@ export default function ClientesPage() {
                         </SelectContent>
                       </Select>
                     </div>
+                    */}
                     {/* Podrías añadir más campos aquí, como fecha de inicio de membresía, etc. */}
                   </div>
                   <DialogFooter>
@@ -217,5 +218,3 @@ export default function ClientesPage() {
     </div>
   );
 }
-
-    
