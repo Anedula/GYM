@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from "@/components/ui/label";
 import { PlusCircle, Search, Filter, UserX, UserCheck, Hourglass } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 interface Client {
   id: string;
@@ -63,7 +65,7 @@ export default function ClientesPage() {
   const handleStatusFilterChange = (status: Client["membershipStatus"]) => {
     setStatusFilter(prev => ({ ...prev, [status]: !prev[status] }));
   };
-  
+
   const handleAddClientSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // En una aplicación real, aquí manejarías el envío del formulario
@@ -79,7 +81,7 @@ export default function ClientesPage() {
     // Aquí podrías añadir el nuevo cliente a la lista 'mockClients' o recargar los datos
     // Por ahora, solo cerramos el diálogo y mostramos un mensaje.
     alert(`Cliente "${newClient.name}" añadido (simulación). El plan se asignará por separado.`);
-    setIsAddClientDialogOpen(false); 
+    setIsAddClientDialogOpen(false);
   };
 
 
@@ -144,7 +146,7 @@ export default function ClientesPage() {
                       <Label htmlFor="email" className="text-right">Email</Label>
                       <Input id="email" name="email" type="email" className="col-span-3" required />
                     </div>
-                    {/* 
+                    {/*
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="plan" className="text-right">Plan</Label>
                       <Select name="plan" required>
