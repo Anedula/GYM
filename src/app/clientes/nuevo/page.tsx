@@ -76,7 +76,7 @@ const formSchema = z.object({
   contactoEmergenciaRelacion: z.string().min(2, { message: "Relación del contacto es requerida."}),
   contactoEmergenciaTelefono: z.string().regex(/^[0-9\s+-]+$/, { message: "Teléfono de emergencia inválido."}),
 
-  // Plan de Membresía y Pagos
+  // Plan y Pagos
   fechaInicioMembresia: z.date({ required_error: "Fecha de inicio es obligatoria." }),
   tipoMembresiaId: z.string({ required_error: "Debe seleccionar un plan." }),
   metodoPagoPreferido: z.string({ required_error: "Debe seleccionar un método de pago." }),
@@ -117,7 +117,7 @@ const STEPS_CONFIG = [
   },
   {
     id: 2,
-    name: "Membresía y Pagos",
+    name: "Plan y Pagos",
     fields: [
       "fechaInicioMembresia", "tipoMembresiaId", "metodoPagoPreferido"
     ] as FieldPath<NuevoClienteFormValues>[]
@@ -266,15 +266,15 @@ export default function NuevoClientePage() {
             </CardContent>
           </Card>
         );
-      case 2: // Plan de Membresía y Pagos
+      case 2: // Plan y Pagos
         return (
           <Card>
-            <CardHeader> <CardTitle>Plan de Membresía y Pagos</CardTitle> </CardHeader>
+            <CardHeader> <CardTitle>Plan y Pagos</CardTitle> </CardHeader>
             <CardContent className="space-y-4">
-              <FormField control={form.control} name="fechaInicioMembresia" render={({ field }) => ( <FormItem className="flex flex-col"> <FormLabel>Fecha de Inicio de Membresía</FormLabel> <Popover> <PopoverTrigger asChild> <FormControl> <Button variant={"outline"} className={cn( "w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground" )}> {field.value ? format(field.value, "PPP", { locale: es }) : <span>Selecciona una fecha</span>} <CalendarIcon className="ml-auto h-4 w-4 opacity-50" /> </Button> </FormControl> </PopoverTrigger> <PopoverContent className="w-auto p-0" align="start"> <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={es}/> </PopoverContent> </Popover> <FormDescription>Por defecto es hoy, pero puedes cambiarla.</FormDescription> <FormMessage /> </FormItem> )}/>
-              <FormField control={form.control} name="tipoMembresiaId" render={({ field }) => ( <FormItem> <FormLabel>Tipo de Membresía/Plan</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Selecciona un plan" /> </SelectTrigger> </FormControl> <SelectContent> {mockPlans.map(plan => ( <SelectItem key={plan.id} value={plan.id}> {plan.name} (${plan.price} - {plan.duration}) </SelectItem> ))} </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+              <FormField control={form.control} name="fechaInicioMembresia" render={({ field }) => ( <FormItem className="flex flex-col"> <FormLabel>Fecha de Inicio del Plan</FormLabel> <Popover> <PopoverTrigger asChild> <FormControl> <Button variant={"outline"} className={cn( "w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground" )}> {field.value ? format(field.value, "PPP", { locale: es }) : <span>Selecciona una fecha</span>} <CalendarIcon className="ml-auto h-4 w-4 opacity-50" /> </Button> </FormControl> </PopoverTrigger> <PopoverContent className="w-auto p-0" align="start"> <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={es}/> </PopoverContent> </Popover> <FormDescription>Por defecto es hoy, pero puedes cambiarla.</FormDescription> <FormMessage /> </FormItem> )}/>
+              <FormField control={form.control} name="tipoMembresiaId" render={({ field }) => ( <FormItem> <FormLabel>Plan</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Selecciona un plan" /> </SelectTrigger> </FormControl> <SelectContent> {mockPlans.map(plan => ( <SelectItem key={plan.id} value={plan.id}> {plan.name} (${plan.price} - {plan.duration}) </SelectItem> ))} </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
               <FormItem> <FormLabel>Monto de la Cuota</FormLabel> <FormControl> <Input value={selectedPlan ? `$${selectedPlan.price.toFixed(2)}` : "N/A"} readOnly className="bg-muted/50" /> </FormControl> </FormItem>
-              <FormItem> <FormLabel>Fecha de Vencimiento de Membresía</FormLabel> <FormControl> <Input value={calculatedExpiryDate ? format(calculatedExpiryDate, "PPP", { locale: es }) : "N/A"} readOnly className="bg-muted/50" /> </FormControl> </FormItem>
+              <FormItem> <FormLabel>Fecha de Vencimiento del Plan</FormLabel> <FormControl> <Input value={calculatedExpiryDate ? format(calculatedExpiryDate, "PPP", { locale: es }) : "N/A"} readOnly className="bg-muted/50" /> </FormControl> </FormItem>
               <FormField control={form.control} name="metodoPagoPreferido" render={({ field }) => ( <FormItem> <FormLabel>Método de Pago Preferido</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Selecciona un método de pago" /> </SelectTrigger> </FormControl> <SelectContent> <SelectItem value="efectivo">Efectivo</SelectItem> <SelectItem value="tarjeta_debito_credito">Tarjeta de Débito/Crédito</SelectItem> <SelectItem value="transferencia_bancaria">Transferencia Bancaria</SelectItem> <SelectItem value="mercado_pago">Mercado Pago</SelectItem> </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
             </CardContent>
           </Card>
@@ -300,7 +300,7 @@ export default function NuevoClientePage() {
                   <FormControl>
                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
                       <FormItem className="flex items-center space-x-3 space-y-0">
-                        <RadioGroupItem value="si" id={`${field.name}-si`} />
+                         <RadioGroupItem value="si" id={`${field.name}-si`} />
                         <FormLabel htmlFor={`${field.name}-si`} className="font-normal">Sí</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
@@ -390,7 +390,6 @@ export default function NuevoClientePage() {
                       <FormDescription>Selecciona uno o más objetivos.</FormDescription>
                     </div>
                     <FormControl>
-                       {/* This div is the single child for FormControl, ensuring Slot works correctly. */}
                       <div>
                         {objectivesList.map((item) => (
                           <FormItem
@@ -453,7 +452,7 @@ export default function NuevoClientePage() {
                 <p><strong>Teléfono:</strong> {formData.contactoEmergenciaTelefono}</p>
               </div>
               <Separator />
-              <div className="space-y-2"> <h3 className="font-semibold text-lg">Plan de Membresía y Pagos</h3>
+              <div className="space-y-2"> <h3 className="font-semibold text-lg">Plan y Pagos</h3>
                 <p><strong>Fecha de Inicio:</strong> {formData.fechaInicioMembresia ? format(formData.fechaInicioMembresia, "PPP", { locale: es }) : "N/A"}</p>
                 <p><strong>Plan:</strong> {currentSelectedPlan?.name || "N/A"}</p>
                 <p><strong>Monto Cuota:</strong> {currentSelectedPlan ? `$${currentSelectedPlan.price.toFixed(2)}` : "N/A"}</p>
@@ -547,7 +546,8 @@ export default function NuevoClientePage() {
   );
 
   if (!isClient) {
-    return pageContent;
+    // Render a basic version or a loader for SSR/initial client render before hydration
+    return <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-4xl"><Card><CardHeader><CardTitle>Cargando...</CardTitle></CardHeader><CardContent><div className="min-h-[300px]"></div></CardContent></Card></div>;
   }
 
   return (
@@ -556,4 +556,3 @@ export default function NuevoClientePage() {
     </TooltipProvider>
   );
 }
-

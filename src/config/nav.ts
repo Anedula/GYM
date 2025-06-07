@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 import { LayoutDashboard, Users, CreditCard, CalendarDays, BarChart3, Settings, ReceiptText } from 'lucide-react';
 
@@ -26,8 +27,8 @@ export const navItems: NavItem[] = [
     icon: ReceiptText,
   },
   {
-    title: 'Membresías',
-    href: '/membresias',
+    title: 'Planes',
+    href: '/planes',
     icon: CreditCard,
   },
   {

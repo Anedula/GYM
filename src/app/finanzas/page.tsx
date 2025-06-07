@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,9 +33,9 @@ const chartConfig: ChartConfig = {
 };
 
 const transactionHistory = [
-  { id: "t1", date: new Date(2024, 6, 28), description: "Pago Membresía - Ana Pérez", amount: 50, type: "Ingreso" },
+  { id: "t1", date: new Date(2024, 6, 28), description: "Pago Plan - Ana Pérez", amount: 50, type: "Ingreso" },
   { id: "t2", date: new Date(2024, 6, 27), description: "Compra Agua - Caja", amount: -2, type: "Egreso" },
-  { id: "t3", date: new Date(2024, 6, 25), description: "Pago Membresía - Luis García", amount: 30, type: "Ingreso" },
+  { id: "t3", date: new Date(2024, 6, 25), description: "Pago Plan - Luis García", amount: 30, type: "Ingreso" },
   { id: "t4", date: new Date(2024, 6, 22), description: "Pago Proveedor Limpieza", amount: -100, type: "Egreso" },
 ];
 
@@ -111,7 +112,7 @@ export default function FinanzasPage() {
         </Card>
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Ingresos por Tipo de Membresía</CardTitle>
+            <CardTitle>Ingresos por Tipo de Plan</CardTitle>
             <CardDescription>Distribución de ingresos actual.</CardDescription>
           </CardHeader>
           <CardContent className="h-[350px] flex items-center justify-center p-2">

@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, Clock, DollarSign, PlusCircle, Info } from "lucide-react"; // Changed ArrowRight to Info
+import { Users, TrendingUp, Clock, DollarSign, PlusCircle, Info } from "lucide-react";
 import Link from "next/link";
 import type { ChartConfig } from "@/components/ui/chart";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -66,7 +66,7 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Membresías por Vencer</CardTitle>
+            <CardTitle className="text-sm font-medium">Planes por Vencer</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -99,12 +99,12 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex gap-2 md:flex-col">
            <Button asChild className="w-full md:w-auto">
-            <Link href="/clientes?action=add">
+            <Link href="/clientes/nuevo">
               <PlusCircle className="mr-2 h-4 w-4" /> Registrar Cliente
             </Link>
           </Button>
           <Button variant="outline" asChild className="w-full md:w-auto">
-            <Link href="/membresias?action=add_payment">
+            <Link href="/planes?action=add_payment">
               <DollarSign className="mr-2 h-4 w-4" /> Registrar Pago
             </Link>
           </Button>
@@ -132,8 +132,8 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Membresías Próximas a Expirar</CardTitle>
-          <CardDescription>Clientes cuyas membresías expiran pronto.</CardDescription>
+          <CardTitle>Planes Próximos a Expirar</CardTitle>
+          <CardDescription>Clientes cuyos planes expiran pronto.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
