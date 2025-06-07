@@ -4,8 +4,8 @@ import path from 'path';
 
 // Define the path for the database file in the project root
 // Asegúrate de que este path apunte a tu archivo de base de datos SQLite existente.
-// Por defecto, busca 'gymcentral.db' en la raíz del proyecto.
-const dbPath = path.join(process.cwd(), 'gymcentral.db');
+// Se ha actualizado para buscar 'GYM.db' en la raíz del proyecto.
+const dbPath = path.join(process.cwd(), 'GYM.db');
 
 // Initialize the database
 // The 'verbose: console.log' option can be useful for debugging SQL statements during development
