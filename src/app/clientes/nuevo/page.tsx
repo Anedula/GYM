@@ -35,25 +35,31 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { CalendarIcon, Info, ChevronsRight, Check } from "lucide-react";
-import { format, addMonths, addYears } from "date-fns";
+import { format, addMonths, addWeeks } from "date-fns"; // Added addWeeks
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+// Updated MembershipPlan interface to match src/app/planes/page.tsx
 interface MembershipPlan {
   id: string;
   name: string;
   price: number;
-  duration: string;
+  classLimit: number;
+  renewalType: "Mensual" | "Semanal";
+  allowedClasses?: string[];
   description: string;
 }
+
+// Updated mockPlans to match the new structure
 const mockPlans: MembershipPlan[] = [
-  { id: "1", name: "Básico Mensual", price: 30, duration: "1 mes", description: "Acceso a todas las áreas, sin clases." },
-  { id: "2", name: "Premium Mensual", price: 50, duration: "1 mes", description: "Acceso total, incluye clases grupales." },
-  { id: "3", name: "Anual Básico", price: 300, duration: "12 meses", description: "Acceso básico por un año." },
-  { id: "4", name: "Anual Premium", price: 500, duration: "12 meses", description: "Acceso total, clases, y 10% de descuento." },
+    { id: "1", name: "Básico Mensual", price: 3000, classLimit: 8, renewalType: "Mensual", description: "Acceso a 8 clases al mes.", allowedClasses: ["Yoga", "Pilates"] },
+    { id: "2", name: "Premium Mensual", price: 5000, classLimit: 12, renewalType: "Mensual", description: "Acceso a 12 clases al mes, cualquiera.", },
+    { id: "p_funcional", name: "PLAN FUNCIONAL", price: 10000, classLimit: 3, renewalType: "Semanal", allowedClasses: ["Funcional"], description: "3 Clases de funcional por semana." },
+    { id: "p_libre", name: "PLAN LIBRE", price: 35000, classLimit: 12, renewalType: "Mensual", description: "12 Clases cualesquiera por mes." },
+    { id: "p_zumba_funcional", name: "PLAN ZUMBA & FUNCIONAL", price: 35000, classLimit: 12, renewalType: "Mensual", allowedClasses: ["Zumba", "Funcional"], description: "12 Clases (Zumba o Funcional) por mes." },
 ];
 
 const objectivesList = [
@@ -78,7 +84,7 @@ const formSchema = z.object({
 
   // Plan y Pagos
   fechaInicioMembresia: z.date({ required_error: "Fecha de inicio es obligatoria." }),
-  tipoMembresiaId: z.string({ required_error: "Debe seleccionar un plan." }),
+  tipoMembresiaId: z.string({ required_error: "Debe seleccionar un plan." }), // This is now 'tipoPlanId' effectively
   metodoPagoPreferido: z.string({ required_error: "Debe seleccionar un método de pago." }),
 
   // Cuestionario de Salud
@@ -133,7 +139,7 @@ const STEPS_CONFIG = [
   {
     id: 4,
     name: "Resumen y Confirmación",
-    fields: [] // No fields to validate in summary step
+    fields: [] 
   },
 ];
 
@@ -186,14 +192,11 @@ export default function NuevoClientePage() {
       const plan = mockPlans.find(p => p.id === watchTipoMembresiaId);
       setSelectedPlan(plan || null);
       if (plan) {
-        const durationParts = plan.duration.split(" ");
-        const amount = parseInt(durationParts[0]);
-        const unit = durationParts[1];
         let expiryDate;
-        if (unit.startsWith("mes")) {
-          expiryDate = addMonths(watchFechaInicioMembresia, amount);
-        } else if (unit.startsWith("año") || unit.startsWith("ano")) {
-          expiryDate = addYears(watchFechaInicioMembresia, amount);
+        if (plan.renewalType === "Mensual") {
+          expiryDate = addMonths(watchFechaInicioMembresia, 1);
+        } else if (plan.renewalType === "Semanal") {
+          expiryDate = addWeeks(watchFechaInicioMembresia, 1);
         }
         setCalculatedExpiryDate(expiryDate || null);
       } else {
@@ -230,12 +233,23 @@ export default function NuevoClientePage() {
   };
 
   function onSubmit(data: NuevoClienteFormValues) {
+    const finalSelectedPlan = mockPlans.find(p => p.id === data.tipoMembresiaId);
+    let finalCalculatedExpiryDate = null;
+    if (finalSelectedPlan && data.fechaInicioMembresia) {
+        if (finalSelectedPlan.renewalType === "Mensual") {
+            finalCalculatedExpiryDate = addMonths(data.fechaInicioMembresia, 1);
+        } else if (finalSelectedPlan.renewalType === "Semanal") {
+            finalCalculatedExpiryDate = addWeeks(data.fechaInicioMembresia, 1);
+        }
+    }
+    
     console.log("Datos del formulario:", {
       ...data,
       fechaNacimiento: data.fechaNacimiento ? format(data.fechaNacimiento, "yyyy-MM-dd") : null,
-      fechaInicioMembresia: data.fechaInicioMembresia ? format(data.fechaInicioMembresia, "yyyy-MM-dd") : null,
-      fechaVencimientoMembresia: calculatedExpiryDate ? format(calculatedExpiryDate, "yyyy-MM-dd") : null,
-      montoCuota: selectedPlan?.price,
+      fechaInicioPlan: data.fechaInicioMembresia ? format(data.fechaInicioMembresia, "yyyy-MM-dd") : null,
+      fechaVencimientoPlan: finalCalculatedExpiryDate ? format(finalCalculatedExpiryDate, "yyyy-MM-dd") : null,
+      montoCuota: finalSelectedPlan?.price,
+      planInfo: finalSelectedPlan
     });
     toast({
       title: "Cliente Registrado",
@@ -272,7 +286,7 @@ export default function NuevoClientePage() {
             <CardHeader> <CardTitle>Plan y Pagos</CardTitle> </CardHeader>
             <CardContent className="space-y-4">
               <FormField control={form.control} name="fechaInicioMembresia" render={({ field }) => ( <FormItem className="flex flex-col"> <FormLabel>Fecha de Inicio del Plan</FormLabel> <Popover> <PopoverTrigger asChild> <FormControl> <Button variant={"outline"} className={cn( "w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground" )}> {field.value ? format(field.value, "PPP", { locale: es }) : <span>Selecciona una fecha</span>} <CalendarIcon className="ml-auto h-4 w-4 opacity-50" /> </Button> </FormControl> </PopoverTrigger> <PopoverContent className="w-auto p-0" align="start"> <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={es}/> </PopoverContent> </Popover> <FormDescription>Por defecto es hoy, pero puedes cambiarla.</FormDescription> <FormMessage /> </FormItem> )}/>
-              <FormField control={form.control} name="tipoMembresiaId" render={({ field }) => ( <FormItem> <FormLabel>Plan</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Selecciona un plan" /> </SelectTrigger> </FormControl> <SelectContent> {mockPlans.map(plan => ( <SelectItem key={plan.id} value={plan.id}> {plan.name} (${plan.price} - {plan.duration}) </SelectItem> ))} </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+              <FormField control={form.control} name="tipoMembresiaId" render={({ field }) => ( <FormItem> <FormLabel>Plan</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Selecciona un plan" /> </SelectTrigger> </FormControl> <SelectContent> {mockPlans.map(plan => ( <SelectItem key={plan.id} value={plan.id}> {plan.name} (${plan.price} - {plan.renewalType}, {plan.classLimit} clases) </SelectItem> ))} </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
               <FormItem> <FormLabel>Monto de la Cuota</FormLabel> <FormControl> <Input value={selectedPlan ? `$${selectedPlan.price.toFixed(2)}` : "N/A"} readOnly className="bg-muted/50" /> </FormControl> </FormItem>
               <FormItem> <FormLabel>Fecha de Vencimiento del Plan</FormLabel> <FormControl> <Input value={calculatedExpiryDate ? format(calculatedExpiryDate, "PPP", { locale: es }) : "N/A"} readOnly className="bg-muted/50" /> </FormControl> </FormItem>
               <FormField control={form.control} name="metodoPagoPreferido" render={({ field }) => ( <FormItem> <FormLabel>Método de Pago Preferido</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Selecciona un método de pago" /> </SelectTrigger> </FormControl> <SelectContent> <SelectItem value="efectivo">Efectivo</SelectItem> <SelectItem value="tarjeta_debito_credito">Tarjeta de Débito/Crédito</SelectItem> <SelectItem value="transferencia_bancaria">Transferencia Bancaria</SelectItem> <SelectItem value="mercado_pago">Mercado Pago</SelectItem> </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
@@ -284,10 +298,10 @@ export default function NuevoClientePage() {
           <Card>
             <CardHeader> <CardTitle>Cuestionario de Salud</CardTitle> <CardDescription className="text-sm text-muted-foreground"> Esta información es confidencial y se utiliza para garantizar tu seguridad y bienestar. Por favor, responde con sinceridad. </CardDescription> </CardHeader>
             <CardContent className="space-y-6">
-              <FormField control={form.control} name="condicionMedicaPreexistente" render={({ field }) => (
+               <FormField control={form.control} name="condicionMedicaPreexistente" render={({ field }) => (
                 <FormItem className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <FormLabel>¿Padece alguna condición médica preexistente?</FormLabel>
+                     <FormLabel>¿Padece alguna condición médica preexistente?</FormLabel>
                     <Tooltip>
                       <TooltipTrigger type="button" aria-label="Información sobre condiciones médicas preexistentes">
                         <Info className="h-4 w-4 text-muted-foreground cursor-help" />
@@ -300,7 +314,7 @@ export default function NuevoClientePage() {
                   <FormControl>
                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
                       <FormItem className="flex items-center space-x-3 space-y-0">
-                         <RadioGroupItem value="si" id={`${field.name}-si`} />
+                        <RadioGroupItem value="si" id={`${field.name}-si`} />
                         <FormLabel htmlFor={`${field.name}-si`} className="font-normal">Sí</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
@@ -340,7 +354,7 @@ export default function NuevoClientePage() {
                   <FormControl>
                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
                       <FormItem className="flex items-center space-x-3 space-y-0">
-                        <RadioGroupItem value="si" id={`${field.name}-medicamentos-si`} />
+                         <RadioGroupItem value="si" id={`${field.name}-medicamentos-si`} />
                         <FormLabel htmlFor={`${field.name}-medicamentos-si`} className="font-normal">Sí</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
@@ -364,7 +378,7 @@ export default function NuevoClientePage() {
                         <FormLabel htmlFor={`${field.name}-ninguno`} className="font-normal">Ninguno</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
-                        <RadioGroupItem value="principiante" id={`${field.name}-principiante`} />
+                         <RadioGroupItem value="principiante" id={`${field.name}-principiante`} />
                         <FormLabel htmlFor={`${field.name}-principiante`} className="font-normal">Principiante</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
@@ -390,7 +404,7 @@ export default function NuevoClientePage() {
                       <FormDescription>Selecciona uno o más objetivos.</FormDescription>
                     </div>
                     <FormControl>
-                      <div>
+                       <div>
                         {objectivesList.map((item) => (
                           <FormItem
                             key={item.id}
@@ -429,12 +443,15 @@ export default function NuevoClientePage() {
       case 4: // Resumen y Confirmación
         const formData = form.getValues();
         const currentSelectedPlan = mockPlans.find(p => p.id === formData.tipoMembresiaId);
-        const currentCalculatedExpiryDate = watchFechaInicioMembresia && currentSelectedPlan ?
-            (currentSelectedPlan.duration.includes("mes") ?
-            addMonths(watchFechaInicioMembresia, parseInt(currentSelectedPlan.duration)) :
-            addYears(watchFechaInicioMembresia, parseInt(currentSelectedPlan.duration)))
-            : null;
-
+        let currentCalculatedExpiryDate = null;
+        if (watchFechaInicioMembresia && currentSelectedPlan) {
+            if (currentSelectedPlan.renewalType === "Mensual") {
+                currentCalculatedExpiryDate = addMonths(watchFechaInicioMembresia, 1);
+            } else if (currentSelectedPlan.renewalType === "Semanal") {
+                 currentCalculatedExpiryDate = addWeeks(watchFechaInicioMembresia, 1);
+            }
+        }
+        
         return (
           <Card>
             <CardHeader> <CardTitle>Resumen y Confirmación</CardTitle> <CardDescription>Por favor, revisa que toda la información sea correcta antes de guardar.</CardDescription> </CardHeader>
@@ -453,11 +470,17 @@ export default function NuevoClientePage() {
               </div>
               <Separator />
               <div className="space-y-2"> <h3 className="font-semibold text-lg">Plan y Pagos</h3>
-                <p><strong>Fecha de Inicio:</strong> {formData.fechaInicioMembresia ? format(formData.fechaInicioMembresia, "PPP", { locale: es }) : "N/A"}</p>
-                <p><strong>Plan:</strong> {currentSelectedPlan?.name || "N/A"}</p>
+                <p><strong>Fecha de Inicio del Plan:</strong> {formData.fechaInicioMembresia ? format(formData.fechaInicioMembresia, "PPP", { locale: es }) : "N/A"}</p>
+                <p><strong>Plan:</strong> {currentSelectedPlan?.name || "N/A"} ({currentSelectedPlan?.renewalType}, {currentSelectedPlan?.classLimit} clases)</p>
                 <p><strong>Monto Cuota:</strong> {currentSelectedPlan ? `$${currentSelectedPlan.price.toFixed(2)}` : "N/A"}</p>
-                <p><strong>Fecha de Vencimiento:</strong> {currentCalculatedExpiryDate ? format(currentCalculatedExpiryDate, "PPP", { locale: es }) : "N/A"}</p>
+                <p><strong>Fecha de Vencimiento del Plan:</strong> {currentCalculatedExpiryDate ? format(currentCalculatedExpiryDate, "PPP", { locale: es }) : "N/A"}</p>
                 <p><strong>Método de Pago:</strong> {formData.metodoPagoPreferido}</p>
+                {currentSelectedPlan?.allowedClasses && currentSelectedPlan.allowedClasses.length > 0 && (
+                  <p><strong>Clases Permitidas:</strong> {currentSelectedPlan.allowedClasses.join(", ")}</p>
+                )}
+                {(!currentSelectedPlan?.allowedClasses || currentSelectedPlan.allowedClasses.length === 0) && (
+                    <p><strong>Clases Permitidas:</strong> Cualquiera</p>
+                )}
               </div>
               <Separator />
               <div className="space-y-2"> <h3 className="font-semibold text-lg">Cuestionario de Salud</h3>
@@ -546,7 +569,6 @@ export default function NuevoClientePage() {
   );
 
   if (!isClient) {
-    // Render a basic version or a loader for SSR/initial client render before hydration
     return <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-4xl"><Card><CardHeader><CardTitle>Cargando...</CardTitle></CardHeader><CardContent><div className="min-h-[300px]"></div></CardContent></Card></div>;
   }
 
@@ -556,3 +578,4 @@ export default function NuevoClientePage() {
     </TooltipProvider>
   );
 }
+ 

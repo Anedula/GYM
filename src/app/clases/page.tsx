@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -13,40 +14,57 @@ import { PlusCircle, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-interface ClassSchedule {
+interface ScheduledClass {
   id: string;
   date: Date;
   time: string;
   className: string;
-  instructor: string;
+  instructorId: string; // Changed from instructor name to ID
   capacity: number;
   booked: number;
 }
 
-const mockClasses: ClassSchedule[] = [
-  { id: "c1", date: new Date(2024, 7, 5), time: "09:00 AM", className: "Yoga Matutino", instructor: "Elena Paz", capacity: 20, booked: 15 },
-  { id: "c2", date: new Date(2024, 7, 5), time: "06:00 PM", className: "Zumba Fitness", instructor: "Ricardo Sol", capacity: 25, booked: 22 },
-  { id: "c3", date: new Date(2024, 7, 6), time: "10:00 AM", className: "Spinning Pro", instructor: "Ana Rivas", capacity: 15, booked: 15 },
-  { id: "c4", date: new Date(2024, 7, 6), time: "07:00 PM", className: "Boxeo Fit", instructor: "Luis Roca", capacity: 18, booked: 10 },
+interface Instructor {
+  id: string;
+  name: string;
+}
+
+const mockInstructors: Instructor[] = [
+  { id: "i1", name: "Elena Paz" },
+  { id: "i2", name: "Ricardo Sol" },
+  { id: "i3", name: "Ana Rivas" },
+  { id: "i4", name: "Luis Roca" },
+  { id: "i5", name: "Carlos Gómez" }, // Added another instructor
 ];
 
-const mockInstructors = ["Elena Paz", "Ricardo Sol", "Ana Rivas", "Luis Roca", "Nuevo Instructor"];
+const mockScheduledClasses: ScheduledClass[] = [
+  { id: "c1", date: new Date(2024, 7, 5), time: "09:00 AM", className: "Yoga Matutino", instructorId: "i1", capacity: 20, booked: 15 },
+  { id: "c2", date: new Date(2024, 7, 5), time: "06:00 PM", className: "Zumba Fitness", instructorId: "i2", capacity: 25, booked: 22 },
+  { id: "c3", date: new Date(2024, 7, 6), time: "10:00 AM", className: "Spinning Pro", instructorId: "i3", capacity: 15, booked: 15 },
+  { id: "c4", date: new Date(2024, 7, 6), time: "07:00 PM", className: "Boxeo Fit", instructorId: "i4", capacity: 18, booked: 10 },
+  { id: "c5", date: new Date(2024, 7, 7), time: "08:00 AM", className: "Funcional", instructorId: "i5", capacity: 20, booked: 5 },
+];
+
 
 export default function ClasesPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isClassDialogOpen, setIsClassDialogOpen] = useState(false);
-  const [editingClass, setEditingClass] = useState<ClassSchedule | null>(null);
+  const [editingClass, setEditingClass] = useState<ScheduledClass | null>(null);
 
   const classesForSelectedDate = selectedDate
-    ? mockClasses.filter(c => format(c.date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd"))
+    ? mockScheduledClasses.filter(c => format(c.date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd"))
     : [];
+
+  const getInstructorNameById = (id: string) => {
+    return mockInstructors.find(inst => inst.id === id)?.name || "Desconocido";
+  }
 
   const handleCreateNewClass = () => {
     setEditingClass(null);
     setIsClassDialogOpen(true);
   };
 
-  const handleEditClass = (cls: ClassSchedule) => {
+  const handleEditClass = (cls: ScheduledClass) => {
     setEditingClass(cls);
     setIsClassDialogOpen(true);
   };
@@ -57,9 +75,9 @@ export default function ClasesPage() {
     const formData = new FormData(event.currentTarget);
     const classData = {
         className: formData.get('className'),
-        instructor: formData.get('instructor'),
+        instructorId: formData.get('instructorId'), // Now instructorId
         time: formData.get('time'),
-        capacity: formData.get('capacity'),
+        capacity: Number(formData.get('capacity')),
         // date would be selectedDate
     };
     console.log("Class Data:", classData, "Editing Class:", editingClass, "Selected Date:", selectedDate);
@@ -116,7 +134,7 @@ export default function ClasesPage() {
                       <TableRow key={cls.id}>
                         <TableCell>{cls.time}</TableCell>
                         <TableCell className="font-medium">{cls.className}</TableCell>
-                        <TableCell>{cls.instructor}</TableCell>
+                        <TableCell>{getInstructorNameById(cls.instructorId)}</TableCell>
                         <TableCell>{cls.booked}/{cls.capacity}</TableCell>
                         <TableCell className="text-right space-x-1">
                           <Button variant="outline" size="icon" onClick={() => handleEditClass(cls)}>
@@ -163,13 +181,13 @@ export default function ClasesPage() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="class-instructor" className="text-right">Instructor</Label>
-                <Select name="instructor" defaultValue={editingClass?.instructor} required>
+                <Select name="instructorId" defaultValue={editingClass?.instructorId} required> {/* Changed to instructorId */}
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Selecciona instructor" />
                   </SelectTrigger>
                   <SelectContent>
                     {mockInstructors.map(instructor => (
-                      <SelectItem key={instructor} value={instructor}>{instructor}</SelectItem>
+                      <SelectItem key={instructor.id} value={instructor.id}>{instructor.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -193,3 +211,4 @@ export default function ClasesPage() {
     </div>
   );
 }
+ 
