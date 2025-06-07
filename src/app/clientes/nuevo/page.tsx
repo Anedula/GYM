@@ -40,7 +40,6 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-// import { useState, useEffect } from "react"; // Removed as it's consolidated above
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MembershipPlan {
@@ -348,14 +347,15 @@ export default function NuevoClientePage() {
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Registrar Nuevo Cliente</CardTitle>
-          {/* Progress Indicator - Simplified for diagnosis */}
+          {/* Progress Indicator */}
+          {/* If the error "React is not defined" persists, it's highly likely due to a stale cache or environment issue. */}
+          {/* Please ensure you have: 1. Stopped dev server, 2. Deleted .next folder, 3. Deleted node_modules, 4. Run npm install, 5. Restarted dev server, 6. Hard refreshed browser. */}
           <div className="flex items-center justify-center space-x-2 sm:space-x-4 my-4">
             {STEPS_CONFIG.map((step, index) => (
-              <div key={step.id} className="flex flex-col items-center p-2"> {/* Added padding for visibility */}
-                <p className={cn(
-                    "text-sm font-medium",
-                    currentStep === step.id ? "text-primary" : "text-muted-foreground"
-                  )}
+              <div key={step.id} className="flex flex-col items-center p-2">
+                <p className={
+                    `text-sm font-medium ${currentStep === step.id ? "text-primary" : "text-muted-foreground"}`
+                  }
                 >
                   PASO {step.id}: {step.name}
                 </p>
@@ -402,5 +402,3 @@ export default function NuevoClientePage() {
     </TooltipProvider>
   );
 }
-
-    
