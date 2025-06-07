@@ -143,6 +143,11 @@ export default function NuevoClientePage() {
   const [selectedPlan, setSelectedPlan] = useState<MembershipPlan | null>(null);
   const [calculatedExpiryDate, setCalculatedExpiryDate] = useState<Date | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<NuevoClienteFormValues>({
     resolver: zodResolver(formSchema),
@@ -341,18 +346,14 @@ export default function NuevoClientePage() {
     }
   };
 
-  return (
-    <TooltipProvider>
+  const pageContent = (
     <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-4xl">
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Registrar Nuevo Cliente</CardTitle>
-          {/* Progress Indicator */}
-          {/* If the error "React is not defined" persists, it's highly likely due to a stale cache or environment issue. */}
-          {/* Please ensure you have: 1. Stopped dev server, 2. Deleted .next folder, 3. Deleted node_modules, 4. Run npm install, 5. Restarted dev server, 6. Hard refreshed browser. */}
           <div className="flex items-center justify-center space-x-2 sm:space-x-4 my-4">
             {STEPS_CONFIG.map((step, index) => (
-              <div key={step.id} className="flex flex-col items-center p-2">
+              <div key={step.id} className="flex items-center p-2">
                 <p className={
                     `text-sm font-medium ${currentStep === step.id ? "text-primary" : "text-muted-foreground"}`
                   }
@@ -370,7 +371,7 @@ export default function NuevoClientePage() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="min-h-[300px]"> {/* Ensure content area has some height */}
+            <CardContent className="min-h-[300px]">
               {renderStepContent()}
             </CardContent>
             <CardFooter className="flex justify-between pt-6">
@@ -399,6 +400,19 @@ export default function NuevoClientePage() {
         </Form>
       </Card>
     </div>
+  );
+
+  if (!isClient) {
+    // Render a simplified version or null during SSR/before client mount
+    // to avoid hydration issues with TooltipProvider.
+    // Returning the content without TooltipProvider is often a safe bet.
+    return pageContent;
+  }
+
+  return (
+    <TooltipProvider>
+      {pageContent}
     </TooltipProvider>
   );
 }
+
