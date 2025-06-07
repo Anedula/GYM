@@ -151,7 +151,7 @@ export default function NuevoClientePage() {
 
   const form = useForm<NuevoClienteFormValues>({
     resolver: zodResolver(formSchema),
-    mode: "onTouched", 
+    mode: "onTouched",
     defaultValues: {
       nombreCompleto: "",
       telefono: "+54 ",
@@ -192,7 +192,7 @@ export default function NuevoClientePage() {
         let expiryDate;
         if (unit.startsWith("mes")) {
           expiryDate = addMonths(watchFechaInicioMembresia, amount);
-        } else if (unit.startsWith("año") || unit.startsWith("ano")) { 
+        } else if (unit.startsWith("año") || unit.startsWith("ano")) {
           expiryDate = addYears(watchFechaInicioMembresia, amount);
         }
         setCalculatedExpiryDate(expiryDate || null);
@@ -284,41 +284,137 @@ export default function NuevoClientePage() {
           <Card>
             <CardHeader> <CardTitle>Cuestionario de Salud</CardTitle> <CardDescription className="text-sm text-muted-foreground"> Esta información es confidencial y se utiliza para garantizar tu seguridad y bienestar. Por favor, responde con sinceridad. </CardDescription> </CardHeader>
             <CardContent className="space-y-6">
-              <FormField control={form.control} name="condicionMedicaPreexistente" render={({ field }) => ( 
-                <FormItem className="space-y-3"> 
+              <FormField control={form.control} name="condicionMedicaPreexistente" render={({ field }) => (
+                <FormItem className="space-y-3">
                   <div className="flex items-center gap-2">
                     <FormLabel>¿Padece alguna condición médica preexistente?</FormLabel>
-                    <Tooltip> 
+                    <Tooltip>
                       <TooltipTrigger type="button" aria-label="Información sobre condiciones médicas preexistentes">
                         <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                      </TooltipTrigger> 
+                      </TooltipTrigger>
                       <TooltipContent>
                         <p>Ej: diabetes, hipertensión, problemas cardíacos, asma, lesiones previas.</p>
-                      </TooltipContent> 
+                      </TooltipContent>
                     </Tooltip>
                   </div>
-                  <FormControl> 
-                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1"> 
-                      <FormItem className="flex items-center space-x-3 space-y-0"> 
-                        <FormControl> <RadioGroupItem value="si" /> </FormControl> 
-                        <FormLabel className="font-normal">Sí</FormLabel> 
-                      </FormItem> 
-                      <FormItem className="flex items-center space-x-3 space-y-0"> 
-                        <FormControl> <RadioGroupItem value="no" /> </FormControl> 
-                        <FormLabel className="font-normal">No</FormLabel> 
-                      </FormItem> 
-                    </RadioGroup> 
-                  </FormControl> 
-                  <FormMessage /> 
-                </FormItem> 
+                  <FormControl>
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="si" id={`${field.name}-si`} />
+                        <FormLabel htmlFor={`${field.name}-si`} className="font-normal">Sí</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="no" id={`${field.name}-no`} />
+                        <FormLabel htmlFor={`${field.name}-no`} className="font-normal">No</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}/>
               {watchCondicionMedica === "si" && ( <FormField control={form.control} name="condicionMedicaDescripcion" render={({ field }) => ( <FormItem> <FormLabel>Describa la/s condición/es</FormLabel> <FormControl> <Textarea placeholder="Por favor, detalla tus condiciones médicas..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/> )}
-              <FormField control={form.control} name="alergias" render={({ field }) => ( <FormItem className="space-y-3"> <FormLabel>¿Es alérgico/a a algún medicamento o alimento?</FormLabel> <FormControl> <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1"> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl> <RadioGroupItem value="si" /> </FormControl> <FormLabel className="font-normal">Sí</FormLabel> </FormItem> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl> <RadioGroupItem value="no" /> </FormControl> <FormLabel className="font-normal">No</FormLabel> </FormItem> </RadioGroup> </FormControl> <FormMessage /> </FormItem> )}/>
+              
+              <FormField control={form.control} name="alergias" render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>¿Es alérgico/a a algún medicamento o alimento?</FormLabel>
+                  <FormControl>
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="si" id={`${field.name}-alergias-si`} />
+                        <FormLabel htmlFor={`${field.name}-alergias-si`} className="font-normal">Sí</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="no" id={`${field.name}-alergias-no`} />
+                        <FormLabel htmlFor={`${field.name}-alergias-no`} className="font-normal">No</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}/>
               {watchAlergias === "si" && ( <FormField control={form.control} name="alergiasDescripcion" render={({ field }) => ( <FormItem> <FormLabel>Especifique la/s alergia/s</FormLabel> <FormControl> <Textarea placeholder="Indica a qué eres alérgico/a..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/> )}
-              <FormField control={form.control} name="medicamentosActuales" render={({ field }) => ( <FormItem className="space-y-3"> <FormLabel>¿Está tomando algún medicamento actualmente?</FormLabel> <FormControl> <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1"> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl> <RadioGroupItem value="si" /> </FormControl> <FormLabel className="font-normal">Sí</FormLabel> </FormItem> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl> <RadioGroupItem value="no" /> </FormControl> <FormLabel className="font-normal">No</FormLabel> </FormItem> </RadioGroup> </FormControl> <FormMessage /> </FormItem> )}/>
+              
+              <FormField control={form.control} name="medicamentosActuales" render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>¿Está tomando algún medicamento actualmente?</FormLabel>
+                  <FormControl>
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="si" id={`${field.name}-medicamentos-si`} />
+                        <FormLabel htmlFor={`${field.name}-medicamentos-si`} className="font-normal">Sí</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="no" id={`${field.name}-medicamentos-no`} />
+                        <FormLabel htmlFor={`${field.name}-medicamentos-no`} className="font-normal">No</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}/>
               {watchMedicamentos === "si" && ( <FormField control={form.control} name="medicamentosLista" render={({ field }) => ( <FormItem> <FormLabel>Enumere los medicamentos</FormLabel> <FormControl> <Textarea placeholder="Lista los medicamentos que estás tomando..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/> )}
-              <FormField control={form.control} name="nivelActividadFisica" render={({ field }) => ( <FormItem className="space-y-3"> <FormLabel>Nivel de Actividad Física Previo</FormLabel> <FormControl> <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1 md:flex-row md:space-x-4 md:space-y-0"> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl><RadioGroupItem value="ninguno" /></FormControl> <FormLabel className="font-normal">Ninguno</FormLabel> </FormItem> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl><RadioGroupItem value="principiante" /></FormControl> <FormLabel className="font-normal">Principiante</FormLabel> </FormItem> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl><RadioGroupItem value="intermedio" /></FormControl> <FormLabel className="font-normal">Intermedio</FormLabel> </FormItem> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl><RadioGroupItem value="avanzado" /></FormControl> <FormLabel className="font-normal">Avanzado</FormLabel> </FormItem> </RadioGroup> </FormControl> <FormMessage /> </FormItem> )}/>
-              <FormField control={form.control} name="objetivosGimnasio" render={() => ( <FormItem> <div className="mb-4"> <FormLabel className="text-base">Objetivos Principales en el Gimnasio</FormLabel> <FormDescription> Selecciona uno o más objetivos. </FormDescription> </div> {objectivesList.map((item) => ( <FormField key={item.id} control={form.control} name="objetivosGimnasio" render={({ field }) => { return ( <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0"> <FormControl> <Checkbox checked={field.value?.includes(item.id)} onCheckedChange={(checked) => { return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange( (field.value || []).filter( (value) => value !== item.id ) ) }} /> </FormControl> <FormLabel className="font-normal"> {item.label} </FormLabel> </FormItem> ) }} /> ))} <FormMessage /> </FormItem> )}/>
+              
+              <FormField control={form.control} name="nivelActividadFisica" render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Nivel de Actividad Física Previo</FormLabel>
+                  <FormControl>
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1 md:flex-row md:space-x-4 md:space-y-0">
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="ninguno" id={`${field.name}-ninguno`} />
+                        <FormLabel htmlFor={`${field.name}-ninguno`} className="font-normal">Ninguno</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="principiante" id={`${field.name}-principiante`} />
+                        <FormLabel htmlFor={`${field.name}-principiante`} className="font-normal">Principiante</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="intermedio" id={`${field.name}-intermedio`} />
+                        <FormLabel htmlFor={`${field.name}-intermedio`} className="font-normal">Intermedio</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="avanzado" id={`${field.name}-avanzado`} />
+                        <FormLabel htmlFor={`${field.name}-avanzado`} className="font-normal">Avanzado</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}/>
+              <FormField control={form.control} name="objetivosGimnasio" render={() => (
+                <FormItem>
+                  <div className="mb-4">
+                    <FormLabel className="text-base">Objetivos Principales en el Gimnasio</FormLabel>
+                    <FormDescription> Selecciona uno o más objetivos. </FormDescription>
+                  </div>
+                  {objectivesList.map((item) => (
+                    <FormField key={item.id} control={form.control} name="objetivosGimnasio" render={({ field }) => {
+                      return (
+                        <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(item.id)}
+                              onCheckedChange={(checked) => {
+                                return checked
+                                  ? field.onChange([...(field.value || []), item.id])
+                                  : field.onChange(
+                                      (field.value || []).filter(
+                                        (value) => value !== item.id
+                                      )
+                                    )
+                              }}
+                              id={`objetivo-${item.id}`}
+                            />
+                          </FormControl>
+                          <FormLabel htmlFor={`objetivo-${item.id}`} className="font-normal">
+                            {item.label}
+                          </FormLabel>
+                        </FormItem>
+                      )
+                    }} />
+                  ))}
+                  <FormMessage />
+                </FormItem>
+              )}/>
               <FormField control={form.control} name="objetivosOtros" render={({ field }) => ( <FormItem> <FormLabel>Otros Objetivos (Opcional)</FormLabel> <FormControl> <Textarea placeholder="Si tienes otros objetivos, especifícalos aquí..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             </CardContent>
           </Card>
@@ -392,7 +488,7 @@ export default function NuevoClientePage() {
                     {currentStep > step.id || (currentStep === STEPS_CONFIG.length && step.id !== STEPS_CONFIG.length) ? <Check className="h-5 w-5" /> : step.id}
                   </div>
                   <p className={cn(
-                      "text-xs mt-1 text-center", 
+                      "text-xs mt-1 text-center",
                       currentStep === step.id ? "text-primary" : "text-muted-foreground"
                     )}
                   >
@@ -444,6 +540,7 @@ export default function NuevoClientePage() {
   );
 
   if (!isClient) {
+    // Return basic page content or a loader during SSR or before client-side hydration
     return pageContent;
   }
 
@@ -453,4 +550,3 @@ export default function NuevoClientePage() {
     </TooltipProvider>
   );
 }
-
