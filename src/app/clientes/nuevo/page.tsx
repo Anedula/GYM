@@ -284,7 +284,34 @@ export default function NuevoClientePage() {
           <Card>
             <CardHeader> <CardTitle>Cuestionario de Salud</CardTitle> <CardDescription className="text-sm text-muted-foreground"> Esta información es confidencial y se utiliza para garantizar tu seguridad y bienestar. Por favor, responde con sinceridad. </CardDescription> </CardHeader>
             <CardContent className="space-y-6">
-              <FormField control={form.control} name="condicionMedicaPreexistente" render={({ field }) => ( <FormItem className="space-y-3"> <FormLabel className="flex items-center gap-2"> ¿Padece alguna condición médica preexistente? <Tooltip> <TooltipTrigger type="button"><Info className="h-4 w-4 text-muted-foreground cursor-help" /></TooltipTrigger> <TooltipContent><p>Ej: diabetes, hipertensión, problemas cardíacos, asma, lesiones previas.</p></TooltipContent> </Tooltip> </FormLabel> <FormControl> <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1"> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl> <RadioGroupItem value="si" /> </FormControl> <FormLabel className="font-normal">Sí</FormLabel> </FormItem> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl> <RadioGroupItem value="no" /> </FormControl> <FormLabel className="font-normal">No</FormLabel> </FormItem> </RadioGroup> </FormControl> <FormMessage /> </FormItem> )}/>
+              <FormField control={form.control} name="condicionMedicaPreexistente" render={({ field }) => ( 
+                <FormItem className="space-y-3"> 
+                  <div className="flex items-center gap-2">
+                    <FormLabel>¿Padece alguna condición médica preexistente?</FormLabel>
+                    <Tooltip> 
+                      <TooltipTrigger type="button" aria-label="Información sobre condiciones médicas preexistentes">
+                        <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger> 
+                      <TooltipContent>
+                        <p>Ej: diabetes, hipertensión, problemas cardíacos, asma, lesiones previas.</p>
+                      </TooltipContent> 
+                    </Tooltip>
+                  </div>
+                  <FormControl> 
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1"> 
+                      <FormItem className="flex items-center space-x-3 space-y-0"> 
+                        <FormControl> <RadioGroupItem value="si" /> </FormControl> 
+                        <FormLabel className="font-normal">Sí</FormLabel> 
+                      </FormItem> 
+                      <FormItem className="flex items-center space-x-3 space-y-0"> 
+                        <FormControl> <RadioGroupItem value="no" /> </FormControl> 
+                        <FormLabel className="font-normal">No</FormLabel> 
+                      </FormItem> 
+                    </RadioGroup> 
+                  </FormControl> 
+                  <FormMessage /> 
+                </FormItem> 
+              )}/>
               {watchCondicionMedica === "si" && ( <FormField control={form.control} name="condicionMedicaDescripcion" render={({ field }) => ( <FormItem> <FormLabel>Describa la/s condición/es</FormLabel> <FormControl> <Textarea placeholder="Por favor, detalla tus condiciones médicas..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/> )}
               <FormField control={form.control} name="alergias" render={({ field }) => ( <FormItem className="space-y-3"> <FormLabel>¿Es alérgico/a a algún medicamento o alimento?</FormLabel> <FormControl> <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1"> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl> <RadioGroupItem value="si" /> </FormControl> <FormLabel className="font-normal">Sí</FormLabel> </FormItem> <FormItem className="flex items-center space-x-3 space-y-0"> <FormControl> <RadioGroupItem value="no" /> </FormControl> <FormLabel className="font-normal">No</FormLabel> </FormItem> </RadioGroup> </FormControl> <FormMessage /> </FormItem> )}/>
               {watchAlergias === "si" && ( <FormField control={form.control} name="alergiasDescripcion" render={({ field }) => ( <FormItem> <FormLabel>Especifique la/s alergia/s</FormLabel> <FormControl> <Textarea placeholder="Indica a qué eres alérgico/a..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/> )}
@@ -353,7 +380,7 @@ export default function NuevoClientePage() {
           <CardTitle className="text-2xl">Registrar Nuevo Cliente</CardTitle>
           <div className="flex items-center justify-center space-x-2 sm:space-x-4 my-4">
             {STEPS_CONFIG.map((step, index) => (
-              <div key={step.id} className="flex items-center"> {/* Using div with key */}
+              <div key={step.id} className="flex items-center">
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
@@ -365,7 +392,7 @@ export default function NuevoClientePage() {
                     {currentStep > step.id || (currentStep === STEPS_CONFIG.length && step.id !== STEPS_CONFIG.length) ? <Check className="h-5 w-5" /> : step.id}
                   </div>
                   <p className={cn(
-                      "text-xs mt-1 text-center", // Added text-center for better alignment
+                      "text-xs mt-1 text-center", 
                       currentStep === step.id ? "text-primary" : "text-muted-foreground"
                     )}
                   >
@@ -417,8 +444,6 @@ export default function NuevoClientePage() {
   );
 
   if (!isClient) {
-    // Render a simplified version or null during SSR/before client mount
-    // to avoid hydration issues with TooltipProvider.
     return pageContent;
   }
 
@@ -428,3 +453,4 @@ export default function NuevoClientePage() {
     </TooltipProvider>
   );
 }
+
