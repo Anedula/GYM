@@ -351,7 +351,7 @@ export default function NuevoClientePage() {
           {/* Progress Indicator */}
           <div className="flex items-center justify-center space-x-2 sm:space-x-4 my-4">
             {STEPS_CONFIG.map((step, index) => (
-              <React.Fragment key={step.id}>
+              <div key={step.id} className="flex items-center gap-2 sm:gap-4">
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
@@ -377,7 +377,7 @@ export default function NuevoClientePage() {
                     )}
                   />
                 )}
-              </React.Fragment>
+              </div>
             ))}
           </div>
            <CardDescription>
