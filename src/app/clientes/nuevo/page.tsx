@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from "react"; // Added React import
+import React, { useState, useEffect } from "react"; // Consolidated import
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller, type FieldPath } from "react-hook-form";
 import { z } from "zod";
@@ -34,13 +34,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { CalendarIcon, Info, ChevronsRight, Check } from "lucide-react"; // Added Check icon
+import { CalendarIcon, Info, ChevronsRight, Check } from "lucide-react";
 import { format, addMonths, addYears } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react"; // Removed as it's consolidated above
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MembershipPlan {
@@ -348,35 +348,18 @@ export default function NuevoClientePage() {
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Registrar Nuevo Cliente</CardTitle>
-          {/* Progress Indicator */}
+          {/* Progress Indicator - Simplified for diagnosis */}
           <div className="flex items-center justify-center space-x-2 sm:space-x-4 my-4">
             {STEPS_CONFIG.map((step, index) => (
-              <div key={step.id} className="flex items-center gap-2 sm:gap-4">
-                <div className="flex flex-col items-center">
-                  <div
-                    className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-full border-2",
-                      currentStep > step.id ? "bg-primary border-primary text-primary-foreground" :
-                      currentStep === step.id ? "border-primary text-primary animate-pulse" : "border-muted-foreground text-muted-foreground"
-                    )}
-                  >
-                    {currentStep > step.id ? <Check className="w-5 h-5" /> : step.id}
-                  </div>
-                  <p className={cn(
-                      "text-xs mt-1 text-center",
-                      currentStep === step.id ? "text-primary font-semibold" : "text-muted-foreground"
-                    )}
-                  >
-                    {step.name}
-                  </p>
-                </div>
-                {index < STEPS_CONFIG.length - 1 && (
-                  <ChevronsRight className={cn(
-                      "w-5 h-5 sm:w-6 sm:h-6 mt-[-1.25rem]", // Adjust vertical alignment
-                      currentStep > step.id +1 ? "text-primary" : "text-muted-foreground/50" // Check if current step is beyond the next step to color arrow
-                    )}
-                  />
-                )}
+              <div key={step.id} className="flex flex-col items-center p-2"> {/* Added padding for visibility */}
+                <p className={cn(
+                    "text-sm font-medium",
+                    currentStep === step.id ? "text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  PASO {step.id}: {step.name}
+                </p>
+                {index < STEPS_CONFIG.length - 1 && <span className="text-muted-foreground mx-2">-&gt;</span>}
               </div>
             ))}
           </div>
@@ -420,3 +403,4 @@ export default function NuevoClientePage() {
   );
 }
 
+    
