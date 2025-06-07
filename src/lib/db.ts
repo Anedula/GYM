@@ -3,13 +3,21 @@ import Database from 'better-sqlite3';
 import path from 'path';
 
 // Define the path for the database file in the project root
+// Asegúrate de que este path apunte a tu archivo de base de datos SQLite existente.
+// Por defecto, busca 'gymcentral.db' en la raíz del proyecto.
 const dbPath = path.join(process.cwd(), 'gymcentral.db');
 
 // Initialize the database
 // The 'verbose: console.log' option can be useful for debugging SQL statements during development
-const db = new Database(dbPath /*, { verbose: console.log } */); 
+const db = new Database(dbPath /*, { verbose: console.log } */);
 db.pragma('journal_mode = WAL'); // Recommended for performance and concurrency
 
+console.log(`Conectado a la base de datos SQLite en: ${dbPath}`);
+console.log("La aplicación ahora espera que la base de datos y sus tablas ya existan.");
+console.log("Si necesitas una referencia del esquema que la aplicación podría esperar, consulta la función initializeDb comentada en este archivo.");
+
+/*
+// ---- INICIO DE LA FUNCIÓN initializeDb COMENTADA (REFERENCIA DE ESQUEMA) ----
 function initializeDb() {
   console.log('Attempting to initialize database schema...');
 
@@ -54,7 +62,7 @@ function initializeDb() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS payments (
       id TEXT PRIMARY KEY,
-      clientName TEXT NOT NULL, 
+      clientName TEXT NOT NULL,
       clientId TEXT NOT NULL, -- Should ideally be a FOREIGN KEY to clients(id)
       planName TEXT NOT NULL,
       planId TEXT NOT NULL, -- Should ideally be a FOREIGN KEY to membership_plans(id)
@@ -69,7 +77,7 @@ function initializeDb() {
   // Seed initial data for clients if the table is empty
   const clientCheckStmt = db.prepare('SELECT COUNT(*) as count FROM clients');
   const clientCountResult = clientCheckStmt.get() as { count: number } | undefined;
-  
+
   if (clientCountResult && clientCountResult.count === 0) {
     console.log('Seeding initial client data...');
     const insertClient = db.prepare(
@@ -81,7 +89,7 @@ function initializeDb() {
       { id: "3", name: "Pedro Pascal", email: "pedro@example.com", membershipStatus: "pendiente" as const, expiryDate: "2024-07-31", lastPayment: "N/A", plan: "Mensual" },
       { id: "4", name: "Isabel Allende", email: "isabel@example.com", membershipStatus: "activo" as const, expiryDate: "2025-03-10", lastPayment: "2024-03-10", plan: "Anual" },
     ];
-    
+
     db.transaction(() => {
       for (const client of initialClients) {
         insertClient.run(client.id, client.name, client.email, client.membershipStatus, client.expiryDate, client.lastPayment, client.plan);
@@ -92,12 +100,15 @@ function initializeDb() {
     console.log('Clients table already contains data or an error occurred fetching count, skipping seeding.');
   }
 }
+// ---- FIN DE LA FUNCIÓN initializeDb COMENTADA ----
+*/
 
-// Run an initial setup
-try {
-  initializeDb();
-} catch (error) {
-  console.error("Failed to initialize the database:", error);
-}
+// La llamada a initializeDb() ya no se hace. La aplicación simplemente se conectará.
+// // Run an initial setup
+// try {
+//   initializeDb();
+// } catch (error) {
+//   console.error("Failed to initialize the database:", error);
+// }
 
 export default db;
