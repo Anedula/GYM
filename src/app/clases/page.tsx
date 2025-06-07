@@ -1,20 +1,20 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PlusCircle, Edit, Trash2 } from "lucide-react";
-import { format, setDay, parseISO } from "date-fns";
+import { PlusCircle, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, setDay, parseISO, startOfWeek, endOfWeek, eachDayOfInterval, addDays, subDays, isEqual, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface ScheduledClass {
   id: string;
@@ -33,7 +33,7 @@ interface Instructor {
 
 interface ScheduleSlot {
   dayName: string;
-  dayIndex: number; // 0 for Sunday (used by date-fns setDay), 1 for Monday, etc.
+  dayIndex: number; 
   time: string;
   enabled: boolean;
 }
@@ -47,11 +47,13 @@ const mockInstructors: Instructor[] = [
 ];
 
 const initialMockScheduledClasses: ScheduledClass[] = [
-  { id: "c1", date: new Date(2024, 7, 5), time: "09:00", className: "Yoga Matutino", instructorId: "i1", capacity: 20, booked: 15 },
-  { id: "c2", date: new Date(2024, 7, 5), time: "18:00", className: "Zumba Fitness", instructorId: "i2", capacity: 25, booked: 22 },
-  { id: "c3", date: new Date(2024, 7, 6), time: "10:00", className: "Spinning Pro", instructorId: "i3", capacity: 15, booked: 15 },
-  { id: "c4", date: new Date(2024, 7, 6), time: "19:00", className: "Boxeo Fit", instructorId: "i4", capacity: 18, booked: 10 },
-  { id: "c5", date: new Date(2024, 7, 7), time: "08:00", className: "Funcional", instructorId: "i5", capacity: 20, booked: 5 },
+  { id: "c1", date: new Date(2024, 7, 5), time: "09:00", className: "Yoga Matutino", instructorId: "i1", capacity: 20, booked: 15 }, // Lunes
+  { id: "c2", date: new Date(2024, 7, 5), time: "18:00", className: "Zumba Fitness", instructorId: "i2", capacity: 25, booked: 22 }, // Lunes
+  { id: "c3", date: new Date(2024, 7, 6), time: "10:00", className: "Spinning Pro", instructorId: "i3", capacity: 15, booked: 15 }, // Martes
+  { id: "c4", date: new Date(2024, 7, 6), time: "19:00", className: "Boxeo Fit", instructorId: "i4", capacity: 18, booked: 10 }, // Martes
+  { id: "c5", date: new Date(2024, 7, 7), time: "08:00", className: "Funcional", instructorId: "i5", capacity: 20, booked: 5 },   // Miércoles
+  { id: "c6", date: new Date(2024, 7, 8), time: "17:00", className: "Yoga Matutino", instructorId: "i1", capacity: 20, booked: 18 }, // Jueves
+  { id: "c7", date: new Date(2024, 7, 9), time: "09:30", className: "Spinning Pro", instructorId: "i3", capacity: 15, booked: 12 }, // Viernes
 ];
 
 const initialDaysFramework: ScheduleSlot[] = [
@@ -67,18 +69,17 @@ const initialDaysFramework: ScheduleSlot[] = [
 
 export default function ClasesPage() {
   const [scheduledClasses, setScheduledClasses] = useState<ScheduledClass[]>(initialMockScheduledClasses);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Default to today
   const [isClassDialogOpen, setIsClassDialogOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<ScheduledClass | null>(null);
   const { toast } = useToast();
 
-  // State for the new class form (dialog)
   const [newClassName, setNewClassName] = useState("");
   const [newInstructorId, setNewInstructorId] = useState("");
   const [newCapacity, setNewCapacity] = useState<number | string>("");
-  const [newClassTime, setNewClassTime] = useState(""); // For editing single instance
+  const [newClassTime, setNewClassTime] = useState(""); 
   const [newClassScheduleSlots, setNewClassScheduleSlots] = useState<ScheduleSlot[]>(
-    JSON.parse(JSON.stringify(initialDaysFramework)) // Deep copy
+    JSON.parse(JSON.stringify(initialDaysFramework))
   );
 
   useEffect(() => {
@@ -87,10 +88,9 @@ export default function ClasesPage() {
         setNewClassName(editingClass.className);
         setNewInstructorId(editingClass.instructorId);
         setNewCapacity(editingClass.capacity);
-        setNewClassTime(editingClass.time); // For editing mode
-        setNewClassScheduleSlots(JSON.parse(JSON.stringify(initialDaysFramework))); // Reset days for editing mode
+        setNewClassTime(editingClass.time); 
+        setNewClassScheduleSlots(JSON.parse(JSON.stringify(initialDaysFramework))); 
       } else {
-        // Reset for new class creation
         setNewClassName("");
         setNewInstructorId("");
         setNewCapacity("");
@@ -100,10 +100,17 @@ export default function ClasesPage() {
     }
   }, [isClassDialogOpen, editingClass]);
 
+  const weekDays = useMemo(() => {
+    const start = startOfWeek(selectedDate, { weekStartsOn: 1, locale: es }); // weekStartsOn: 1 for Monday
+    const end = endOfWeek(selectedDate, { weekStartsOn: 1, locale: es });
+    return eachDayOfInterval({ start, end });
+  }, [selectedDate]);
 
-  const classesForSelectedDate = selectedDate
-    ? scheduledClasses.filter(c => format(c.date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd"))
-    : [];
+  const getClassesForDay = (date: Date): ScheduledClass[] => {
+    return scheduledClasses
+      .filter(c => isSameDay(c.date, date))
+      .sort((a, b) => a.time.localeCompare(b.time));
+  };
 
   const getInstructorNameById = (id: string) => {
     return mockInstructors.find(inst => inst.id === id)?.name || "Desconocido";
@@ -127,8 +134,17 @@ export default function ClasesPage() {
       toast({ title: "Error", description: "La capacidad debe ser un número positivo.", variant: "destructive" });
       return;
     }
+    if (!newClassName.trim()) {
+      toast({ title: "Error", description: "El nombre de la clase es obligatorio.", variant: "destructive" });
+      return;
+    }
+     if (!newInstructorId) {
+      toast({ title: "Error", description: "Debe seleccionar un instructor.", variant: "destructive" });
+      return;
+    }
 
-    if (editingClass) { // Editing existing single class
+
+    if (editingClass) { 
       if (!newClassTime) {
         toast({ title: "Error", description: "La hora es obligatoria para editar.", variant: "destructive" });
         return;
@@ -141,19 +157,18 @@ export default function ClasesPage() {
         )
       );
       toast({ title: "Clase Actualizada", description: `La clase "${newClassName}" ha sido actualizada.` });
-    } else { // Creating new class(es) based on schedule slots
-      if (!selectedDate) {
-        toast({ title: "Error", description: "Por favor, selecciona una fecha base en el calendario.", variant: "destructive" });
-        return;
-      }
+    } else { 
       const newClassesToAdd: ScheduledClass[] = [];
       let createdCount = 0;
 
       newClassScheduleSlots.forEach(slot => {
         if (slot.enabled && slot.time) {
-          const classDate = setDay(selectedDate, slot.dayIndex, { locale: es });
+          // Use startOfWeek to ensure we are setting the day within the *selected* week.
+          const baseDateForWeek = startOfWeek(selectedDate, { weekStartsOn: 1, locale: es });
+          const classDate = setDay(baseDateForWeek, slot.dayIndex, { locale: es });
+          
           const newClassInstance: ScheduledClass = {
-            id: `c-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`, // Simple unique ID
+            id: `c-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
             date: classDate,
             time: slot.time,
             className: newClassName,
@@ -172,7 +187,7 @@ export default function ClasesPage() {
       }
 
       setScheduledClasses(prevClasses => [...prevClasses, ...newClassesToAdd]);
-      toast({ title: "Clases Creadas", description: `${createdCount} instancia(s) de "${newClassName}" creadas para la semana del ${format(selectedDate, "PPP", { locale: es })}.` });
+      toast({ title: "Clases Creadas", description: `${createdCount} instancia(s) de "${newClassName}" creadas para la semana del ${format(startOfWeek(selectedDate, {weekStartsOn:1, locale:es}), "PPP", { locale: es })}.` });
     }
 
     setIsClassDialogOpen(false);
@@ -188,87 +203,111 @@ export default function ClasesPage() {
     setNewClassScheduleSlots(updatedSlots);
   };
 
-  return (
-    <div className="flex flex-col lg:flex-row gap-6">
-      <Card className="lg:w-1/3 h-fit">
-        <CardHeader>
-          <CardTitle>Calendario de Clases</CardTitle>
-          <CardDescription>Selecciona una fecha para ver las clases.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="rounded-md border"
-            locale={es}
-          />
-        </CardContent>
-      </Card>
+  const handlePreviousWeek = () => {
+    setSelectedDate(prevDate => subDays(prevDate, 7));
+  };
 
-      <Card className="flex-1">
-        <CardHeader className="flex flex-row justify-between items-start">
-          <div>
-            <CardTitle>
-              Clases para {selectedDate ? format(selectedDate, "PPP", { locale: es }) : "Ninguna Fecha Seleccionada"}
-            </CardTitle>
-            <CardDescription>Detalles de las clases programadas.</CardDescription>
-          </div>
-          <Button onClick={handleCreateNewClass} disabled={!selectedDate}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Crear Nueva Clase
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {selectedDate ? (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Hora</TableHead>
-                    <TableHead>Clase</TableHead>
-                    <TableHead>Instructor</TableHead>
-                    <TableHead>Capacidad</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {classesForSelectedDate.length > 0 ? (
-                    classesForSelectedDate.map((cls) => (
-                      <TableRow key={cls.id}>
-                        <TableCell>{cls.time}</TableCell>
-                        <TableCell className="font-medium">{cls.className}</TableCell>
-                        <TableCell>{getInstructorNameById(cls.instructorId)}</TableCell>
-                        <TableCell>{cls.booked}/{cls.capacity}</TableCell>
-                        <TableCell className="text-right space-x-1">
-                          <Button variant="outline" size="icon" onClick={() => handleEditClass(cls)}>
-                            <Edit className="h-4 w-4" />
-                             <span className="sr-only">Editar</span>
-                          </Button>
-                          <Button variant="destructive" size="icon" onClick={() => {
-                              setScheduledClasses(prev => prev.filter(c => c.id !== cls.id));
-                              toast({title: "Clase Eliminada", description: `Clase "${cls.className}" eliminada.`});
-                            }}>
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Eliminar</span>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
-                        No hay clases programadas para esta fecha.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+  const handleNextWeek = () => {
+    setSelectedDate(prevDate => addDays(prevDate, 7));
+  };
+  
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
+
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
+        <Card className="md:w-1/3 lg:w-1/4 h-fit">
+          <CardHeader>
+            <CardTitle>Seleccionar Semana</CardTitle>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateSelect}
+              className="rounded-md border"
+              locale={es}
+              ISOWeek={true} 
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="flex-1">
+          <CardHeader className="flex flex-row justify-between items-center">
+            <div>
+              <CardTitle>
+                Horario Semanal: {format(startOfWeek(selectedDate, {weekStartsOn:1, locale:es}), "dd MMM", { locale: es })} - {format(endOfWeek(selectedDate, {weekStartsOn:1, locale:es}), "dd MMM, yyyy", { locale: es })}
+              </CardTitle>
+              <CardDescription>Clases programadas para la semana seleccionada.</CardDescription>
             </div>
-          ) : (
-             <p className="text-center text-muted-foreground py-10">Por favor, selecciona una fecha en el calendario.</p>
-          )}
-        </CardContent>
-      </Card>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={handlePreviousWeek}>
+                <ChevronLeft className="h-4 w-4" />
+                 <span className="sr-only">Semana Anterior</span>
+              </Button>
+              <Button variant="outline" size="icon" onClick={handleNextWeek}>
+                <ChevronRight className="h-4 w-4" />
+                <span className="sr-only">Semana Siguiente</span>
+              </Button>
+              <Button onClick={handleCreateNewClass}>
+                <PlusCircle className="mr-2 h-4 w-4" /> Crear Clases
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+              <div className="flex w-max space-x-0"> {/* Ensure no space for border continuity */}
+                {weekDays.map((day, index) => {
+                  const classesForDay = getClassesForDay(day);
+                  return (
+                    <div key={day.toISOString()} className={`flex-none w-64 border-r ${index === weekDays.length - 1 ? 'border-r-0' : ''}`}>
+                      <div className="p-3 bg-muted/50 border-b">
+                        <p className="font-semibold capitalize">{format(day, "eeee", { locale: es })}</p>
+                        <p className="text-sm text-muted-foreground">{format(day, "dd/MM", { locale: es })}</p>
+                      </div>
+                      <ScrollArea className="h-[400px]"> {/* Max height for scroll */}
+                        <div className="p-3 space-y-2">
+                          {classesForDay.length > 0 ? (
+                            classesForDay.map(cls => (
+                              <Card key={cls.id} className="p-2 shadow-sm">
+                                <p className="font-semibold text-sm">{cls.className}</p>
+                                <p className="text-xs text-muted-foreground">{cls.time}</p>
+                                <p className="text-xs text-muted-foreground">Prof: {getInstructorNameById(cls.instructorId)}</p>
+                                <p className="text-xs text-muted-foreground">Cupo: {cls.booked}/{cls.capacity}</p>
+                                <div className="mt-1.5 flex justify-end space-x-1">
+                                  <Button variant="outline" size="icon-sm" onClick={() => handleEditClass(cls)}>
+                                    <Edit className="h-3.5 w-3.5" />
+                                    <span className="sr-only">Editar</span>
+                                  </Button>
+                                  <Button variant="destructive" size="icon-sm" onClick={() => {
+                                      setScheduledClasses(prev => prev.filter(c => c.id !== cls.id));
+                                      toast({title: "Clase Eliminada", description: `Clase "${cls.className}" eliminada.`});
+                                    }}>
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <span className="sr-only">Eliminar</span>
+                                  </Button>
+                                </div>
+                              </Card>
+                            ))
+                          ) : (
+                            <p className="text-xs text-muted-foreground text-center py-4">No hay clases.</p>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  );
+                })}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
 
       <Dialog open={isClassDialogOpen} onOpenChange={setIsClassDialogOpen}>
         <DialogContent className="sm:max-w-lg">
@@ -276,7 +315,7 @@ export default function ClasesPage() {
             <DialogTitle>{editingClass ? "Editar Clase" : "Crear Nuevas Clases Semanales"}</DialogTitle>
             <DialogDescription>
               {editingClass ? "Modifica los detalles de la clase." : 
-              `Define los horarios para "${newClassName || "nueva clase"}" en la semana del ${selectedDate ? format(selectedDate, "PPP", { locale: es }) : 'fecha seleccionada'}.`}
+              `Define los horarios para "${newClassName || "nueva clase"}" en la semana del ${format(startOfWeek(selectedDate, { weekStartsOn:1, locale:es }), "PPP", { locale: es })}.`}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleClassFormSubmit}>
@@ -303,16 +342,16 @@ export default function ClasesPage() {
                 <Input id="class-capacity" type="number" value={newCapacity} onChange={(e) => setNewCapacity(e.target.value)} className="col-span-3" required />
               </div>
 
-              {editingClass ? ( // Mode for editing a single class instance
+              {editingClass ? ( 
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="class-time-edit" className="text-right">Hora</Label>
                   <Input id="class-time-edit" type="time" value={newClassTime} onChange={(e) => setNewClassTime(e.target.value)} className="col-span-3" required />
                 </div>
-              ) : ( // Mode for creating new classes with weekly schedule
+              ) : ( 
                 <div className="col-span-4 space-y-3 rounded-md border p-4">
                   <Label className="text-base font-medium">Horarios Semanales</Label>
                   <p className="text-sm text-muted-foreground">
-                    Selecciona los días y establece la hora para cada clase. Se crearán instancias para la semana de la fecha seleccionada en el calendario.
+                    Selecciona los días y establece la hora para cada clase. Se crearán instancias para la semana de la fecha seleccionada en el selector de semana.
                   </p>
                   {newClassScheduleSlots.map((slot, index) => (
                     <div key={slot.dayName} className="grid grid-cols-3 items-center gap-x-3 gap-y-1">
@@ -322,7 +361,7 @@ export default function ClasesPage() {
                           checked={slot.enabled}
                           onCheckedChange={(checked) => handleSlotChange(index, 'enabled', !!checked)}
                         />
-                        <Label htmlFor={`day-${slot.dayName}`} className="font-normal whitespace-nowrap">
+                        <Label htmlFor={`day-${slot.dayName}`} className="font-normal whitespace-nowrap capitalize">
                           {slot.dayName}
                         </Label>
                       </div>
@@ -350,5 +389,7 @@ export default function ClasesPage() {
     </div>
   );
 }
+
+    
 
     
