@@ -1,6 +1,7 @@
 
 "use client";
 
+import React from "react"; // Added React import
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller, type FieldPath } from "react-hook-form";
 import { z } from "zod";
@@ -33,7 +34,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { CalendarIcon, Info, ChevronsRight } from "lucide-react";
+import { CalendarIcon, Info, ChevronsRight, Check } from "lucide-react"; // Added Check icon
 import { format, addMonths, addYears } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -46,7 +47,7 @@ interface MembershipPlan {
   id: string;
   name: string;
   price: number;
-  duration: string; 
+  duration: string;
   description: string;
 }
 const mockPlans: MembershipPlan[] = [
@@ -107,32 +108,32 @@ const formSchema = z.object({
 export type NuevoClienteFormValues = z.infer<typeof formSchema>;
 
 const STEPS_CONFIG = [
-  { 
-    id: 1, 
-    name: "Datos Personales", 
+  {
+    id: 1,
+    name: "Datos Personales",
     fields: [
       "nombreCompleto", "fechaNacimiento", "telefono", "email", "direccion",
       "contactoEmergenciaNombre", "contactoEmergenciaRelacion", "contactoEmergenciaTelefono"
     ] as FieldPath<NuevoClienteFormValues>[]
   },
-  { 
-    id: 2, 
-    name: "Membresía y Pagos", 
+  {
+    id: 2,
+    name: "Membresía y Pagos",
     fields: [
       "fechaInicioMembresia", "tipoMembresiaId", "metodoPagoPreferido"
     ] as FieldPath<NuevoClienteFormValues>[]
   },
-  { 
-    id: 3, 
-    name: "Cuestionario de Salud", 
+  {
+    id: 3,
+    name: "Cuestionario de Salud",
     fields: [
       "condicionMedicaPreexistente", "condicionMedicaDescripcion", "alergias", "alergiasDescripcion",
       "medicamentosActuales", "medicamentosLista", "nivelActividadFisica", "objetivosGimnasio", "objetivosOtros"
     ] as FieldPath<NuevoClienteFormValues>[]
   },
-  { 
-    id: 4, 
-    name: "Resumen y Confirmación", 
+  {
+    id: 4,
+    name: "Resumen y Confirmación",
     fields: [] // No fields to validate in summary step
   },
 ];
@@ -294,10 +295,10 @@ export default function NuevoClientePage() {
       case 4: // Resumen y Confirmación
         const formData = form.getValues();
         const currentSelectedPlan = mockPlans.find(p => p.id === formData.tipoMembresiaId);
-        const currentCalculatedExpiryDate = watchFechaInicioMembresia && currentSelectedPlan ? 
-            (currentSelectedPlan.duration.includes("mes") ? 
-            addMonths(watchFechaInicioMembresia, parseInt(currentSelectedPlan.duration)) : 
-            addYears(watchFechaInicioMembresia, parseInt(currentSelectedPlan.duration))) 
+        const currentCalculatedExpiryDate = watchFechaInicioMembresia && currentSelectedPlan ?
+            (currentSelectedPlan.duration.includes("mes") ?
+            addMonths(watchFechaInicioMembresia, parseInt(currentSelectedPlan.duration)) :
+            addYears(watchFechaInicioMembresia, parseInt(currentSelectedPlan.duration)))
             : null;
 
         return (
@@ -372,8 +373,8 @@ export default function NuevoClientePage() {
                 {index < STEPS_CONFIG.length - 1 && (
                   <ChevronsRight className={cn(
                       "w-5 h-5 sm:w-6 sm:h-6 mt-[-1.25rem]", // Adjust vertical alignment
-                      currentStep > step.id +1 ? "text-primary" : "text-muted-foreground/50"
-                    )} 
+                      currentStep > step.id +1 ? "text-primary" : "text-muted-foreground/50" // Check if current step is beyond the next step to color arrow
+                    )}
                   />
                 )}
               </React.Fragment>
