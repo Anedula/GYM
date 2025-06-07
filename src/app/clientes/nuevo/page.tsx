@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react"; // Consolidated import
+import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller, type FieldPath } from "react-hook-form";
 import { z } from "zod";
@@ -151,7 +151,7 @@ export default function NuevoClientePage() {
 
   const form = useForm<NuevoClienteFormValues>({
     resolver: zodResolver(formSchema),
-    mode: "onTouched", // Validate on blur/change after first touch
+    mode: "onTouched", 
     defaultValues: {
       nombreCompleto: "",
       telefono: "+54 ",
@@ -192,7 +192,7 @@ export default function NuevoClientePage() {
         let expiryDate;
         if (unit.startsWith("mes")) {
           expiryDate = addMonths(watchFechaInicioMembresia, amount);
-        } else if (unit.startsWith("año") || unit.startsWith("ano")) { // Handle "año" and "ano"
+        } else if (unit.startsWith("año") || unit.startsWith("ano")) { 
           expiryDate = addYears(watchFechaInicioMembresia, amount);
         }
         setCalculatedExpiryDate(expiryDate || null);
@@ -353,14 +353,28 @@ export default function NuevoClientePage() {
           <CardTitle className="text-2xl">Registrar Nuevo Cliente</CardTitle>
           <div className="flex items-center justify-center space-x-2 sm:space-x-4 my-4">
             {STEPS_CONFIG.map((step, index) => (
-              <div key={step.id} className="flex items-center p-2">
-                <p className={
-                    `text-sm font-medium ${currentStep === step.id ? "text-primary" : "text-muted-foreground"}`
-                  }
-                >
-                  PASO {step.id}: {step.name}
-                </p>
-                {index < STEPS_CONFIG.length - 1 && <span className="text-muted-foreground mx-2">-&gt;</span>}
+              <div key={step.id} className="flex items-center"> {/* Using div with key */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className={cn(
+                      "rounded-full h-8 w-8 flex items-center justify-center border-2",
+                      currentStep > step.id || currentStep === STEPS_CONFIG.length ? "bg-primary border-primary text-primary-foreground" :
+                      currentStep === step.id ? "border-primary text-primary" : "border-muted-foreground text-muted-foreground"
+                    )}
+                  >
+                    {currentStep > step.id || (currentStep === STEPS_CONFIG.length && step.id !== STEPS_CONFIG.length) ? <Check className="h-5 w-5" /> : step.id}
+                  </div>
+                  <p className={cn(
+                      "text-xs mt-1 text-center", // Added text-center for better alignment
+                      currentStep === step.id ? "text-primary" : "text-muted-foreground"
+                    )}
+                  >
+                    {step.name}
+                  </p>
+                </div>
+                {index < STEPS_CONFIG.length - 1 && (
+                  <ChevronsRight className="h-6 w-6 text-muted-foreground mx-2 sm:mx-4" />
+                )}
               </div>
             ))}
           </div>
@@ -405,7 +419,6 @@ export default function NuevoClientePage() {
   if (!isClient) {
     // Render a simplified version or null during SSR/before client mount
     // to avoid hydration issues with TooltipProvider.
-    // Returning the content without TooltipProvider is often a safe bet.
     return pageContent;
   }
 
@@ -415,4 +428,3 @@ export default function NuevoClientePage() {
     </TooltipProvider>
   );
 }
-
