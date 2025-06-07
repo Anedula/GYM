@@ -4,7 +4,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+// Calendar component is no longer used for direct selection here
+// import { Calendar } from "@/components/ui/calendar"; 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -69,7 +70,7 @@ const initialDaysFramework: ScheduleSlot[] = [
 
 export default function ClasesPage() {
   const [scheduledClasses, setScheduledClasses] = useState<ScheduledClass[]>(initialMockScheduledClasses);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Default to today
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Default to today, used as anchor for the week
   const [isClassDialogOpen, setIsClassDialogOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<ScheduledClass | null>(null);
   const { toast } = useToast();
@@ -211,15 +212,18 @@ export default function ClasesPage() {
     setSelectedDate(prevDate => addDays(prevDate, 7));
   };
   
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      setSelectedDate(date);
-    }
-  };
+  // handleDateSelect is no longer needed if the Calendar component for selection is removed
+  // const handleDateSelect = (date: Date | undefined) => {
+  //   if (date) {
+  //     setSelectedDate(date);
+  //   }
+  // };
 
 
   return (
     <div className="flex flex-col gap-6">
+      {/* The Card containing the monthly Calendar for week selection is removed */}
+      {/* 
       <div className="flex flex-col md:flex-row gap-6">
         <Card className="md:w-1/3 lg:w-1/4 h-fit">
           <CardHeader>
@@ -236,79 +240,79 @@ export default function ClasesPage() {
             />
           </CardContent>
         </Card>
+      */}
 
-        <Card className="flex-1">
-          <CardHeader className="flex flex-row justify-between items-center">
-            <div>
-              <CardTitle>
-                Horario Semanal: {format(startOfWeek(selectedDate, {weekStartsOn:1, locale:es}), "dd MMM", { locale: es })} - {format(endOfWeek(selectedDate, {weekStartsOn:1, locale:es}), "dd MMM, yyyy", { locale: es })}
-              </CardTitle>
-              <CardDescription>Clases programadas para la semana seleccionada.</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={handlePreviousWeek}>
-                <ChevronLeft className="h-4 w-4" />
-                 <span className="sr-only">Semana Anterior</span>
-              </Button>
-              <Button variant="outline" size="icon" onClick={handleNextWeek}>
-                <ChevronRight className="h-4 w-4" />
-                <span className="sr-only">Semana Siguiente</span>
-              </Button>
-              <Button onClick={handleCreateNewClass}>
-                <PlusCircle className="mr-2 h-4 w-4" /> Crear Clases
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-              <div className="flex w-max space-x-0"> {/* Ensure no space for border continuity */}
-                {weekDays.map((day, index) => {
-                  const classesForDay = getClassesForDay(day);
-                  return (
-                    <div key={day.toISOString()} className={`flex-none w-64 border-r ${index === weekDays.length - 1 ? 'border-r-0' : ''}`}>
-                      <div className="p-3 bg-muted/50 border-b">
-                        <p className="font-semibold capitalize">{format(day, "eeee", { locale: es })}</p>
-                        <p className="text-sm text-muted-foreground">{format(day, "dd/MM", { locale: es })}</p>
-                      </div>
-                      <ScrollArea className="h-[400px]"> {/* Max height for scroll */}
-                        <div className="p-3 space-y-2">
-                          {classesForDay.length > 0 ? (
-                            classesForDay.map(cls => (
-                              <Card key={cls.id} className="p-2 shadow-sm">
-                                <p className="font-semibold text-sm">{cls.className}</p>
-                                <p className="text-xs text-muted-foreground">{cls.time}</p>
-                                <p className="text-xs text-muted-foreground">Prof: {getInstructorNameById(cls.instructorId)}</p>
-                                <p className="text-xs text-muted-foreground">Cupo: {cls.booked}/{cls.capacity}</p>
-                                <div className="mt-1.5 flex justify-end space-x-1">
-                                  <Button variant="outline" size="icon-sm" onClick={() => handleEditClass(cls)}>
-                                    <Edit className="h-3.5 w-3.5" />
-                                    <span className="sr-only">Editar</span>
-                                  </Button>
-                                  <Button variant="destructive" size="icon-sm" onClick={() => {
-                                      setScheduledClasses(prev => prev.filter(c => c.id !== cls.id));
-                                      toast({title: "Clase Eliminada", description: `Clase "${cls.className}" eliminada.`});
-                                    }}>
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                    <span className="sr-only">Eliminar</span>
-                                  </Button>
-                                </div>
-                              </Card>
-                            ))
-                          ) : (
-                            <p className="text-xs text-muted-foreground text-center py-4">No hay clases.</p>
-                          )}
-                        </div>
-                      </ScrollArea>
+      <Card className="flex-1"> {/* This card will now take full width or adjust based on parent */}
+        <CardHeader className="flex flex-row justify-between items-center">
+          <div>
+            <CardTitle>
+              Horario Semanal: {format(startOfWeek(selectedDate, {weekStartsOn:1, locale:es}), "dd MMM", { locale: es })} - {format(endOfWeek(selectedDate, {weekStartsOn:1, locale:es}), "dd MMM, yyyy", { locale: es })}
+            </CardTitle>
+            <CardDescription>Clases programadas para la semana seleccionada.</CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={handlePreviousWeek}>
+              <ChevronLeft className="h-4 w-4" />
+               <span className="sr-only">Semana Anterior</span>
+            </Button>
+            <Button variant="outline" size="icon" onClick={handleNextWeek}>
+              <ChevronRight className="h-4 w-4" />
+              <span className="sr-only">Semana Siguiente</span>
+            </Button>
+            <Button onClick={handleCreateNewClass}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Crear Clases
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+            <div className="flex w-max space-x-0"> {/* Ensure no space for border continuity */}
+              {weekDays.map((day, index) => {
+                const classesForDay = getClassesForDay(day);
+                return (
+                  <div key={day.toISOString()} className={`flex-none w-64 border-r ${index === weekDays.length - 1 ? 'border-r-0' : ''}`}>
+                    <div className="p-3 bg-muted/50 border-b">
+                      <p className="font-semibold capitalize">{format(day, "eeee", { locale: es })}</p>
+                      <p className="text-sm text-muted-foreground">{format(day, "dd/MM", { locale: es })}</p>
                     </div>
-                  );
-                })}
-              </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
-
+                    <ScrollArea className="h-[400px]"> {/* Max height for scroll */}
+                      <div className="p-3 space-y-2">
+                        {classesForDay.length > 0 ? (
+                          classesForDay.map(cls => (
+                            <Card key={cls.id} className="p-2 shadow-sm">
+                              <p className="font-semibold text-sm">{cls.className}</p>
+                              <p className="text-xs text-muted-foreground">{cls.time}</p>
+                              <p className="text-xs text-muted-foreground">Prof: {getInstructorNameById(cls.instructorId)}</p>
+                              <p className="text-xs text-muted-foreground">Cupo: {cls.booked}/{cls.capacity}</p>
+                              <div className="mt-1.5 flex justify-end space-x-1">
+                                <Button variant="outline" size="icon-sm" onClick={() => handleEditClass(cls)}>
+                                  <Edit className="h-3.5 w-3.5" />
+                                  <span className="sr-only">Editar</span>
+                                </Button>
+                                <Button variant="destructive" size="icon-sm" onClick={() => {
+                                    setScheduledClasses(prev => prev.filter(c => c.id !== cls.id));
+                                    toast({title: "Clase Eliminada", description: `Clase "${cls.className}" eliminada.`});
+                                  }}>
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <span className="sr-only">Eliminar</span>
+                                </Button>
+                              </div>
+                            </Card>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground text-center py-4">No hay clases.</p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                );
+              })}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </CardContent>
+      </Card>
+      {/* The Dialog part remains unchanged by this request */}
       <Dialog open={isClassDialogOpen} onOpenChange={setIsClassDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -389,7 +393,3 @@ export default function ClasesPage() {
     </div>
   );
 }
-
-    
-
-    
