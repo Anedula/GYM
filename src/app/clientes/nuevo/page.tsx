@@ -299,7 +299,7 @@ export default function NuevoClientePage() {
                <FormField control={form.control} name="condicionMedicaPreexistente" render={({ field }) => (
                 <FormItem className="space-y-3">
                   <div className="flex items-center gap-2">
-                     <FormLabel>¿Padece alguna condición médica preexistente?</FormLabel>
+                     <FormLabel htmlFor={`${field.name}-group`}>¿Padece alguna condición médica preexistente?</FormLabel>
                     <Tooltip>
                       <TooltipTrigger type="button" aria-label="Información sobre condiciones médicas preexistentes">
                         <Info className="h-4 w-4 text-muted-foreground cursor-help" />
@@ -310,18 +310,16 @@ export default function NuevoClientePage() {
                     </Tooltip>
                   </div>
                   <FormControl>
-                    <div>
-                      <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <RadioGroupItem value="si" id={`${field.name}-si`} />
-                          <FormLabel htmlFor={`${field.name}-si`} className="font-normal">Sí</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <RadioGroupItem value="no" id={`${field.name}-no`} />
-                          <FormLabel htmlFor={`${field.name}-no`} className="font-normal">No</FormLabel>
-                        </FormItem>
-                      </RadioGroup>
-                    </div>
+                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col space-y-1" id={`${field.name}-group`}>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="si" id={`${field.name}-si`} />
+                        <FormLabel htmlFor={`${field.name}-si`} className="font-normal">Sí</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="no" id={`${field.name}-no`} />
+                        <FormLabel htmlFor={`${field.name}-no`} className="font-normal">No</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -330,20 +328,18 @@ export default function NuevoClientePage() {
               
               <FormField control={form.control} name="alergias" render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>¿Es alérgico/a a algún medicamento o alimento?</FormLabel>
+                  <FormLabel htmlFor={`${field.name}-group`}>¿Es alérgico/a a algún medicamento o alimento?</FormLabel>
                   <FormControl>
-                    <div>
-                      <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <RadioGroupItem value="si" id={`${field.name}-alergias-si`} />
-                          <FormLabel htmlFor={`${field.name}-alergias-si`} className="font-normal">Sí</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <RadioGroupItem value="no" id={`${field.name}-alergias-no`} />
-                          <FormLabel htmlFor={`${field.name}-alergias-no`} className="font-normal">No</FormLabel>
-                        </FormItem>
-                      </RadioGroup>
-                    </div>
+                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col space-y-1" id={`${field.name}-group`}>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="si" id={`${field.name}-alergias-si`} />
+                        <FormLabel htmlFor={`${field.name}-alergias-si`} className="font-normal">Sí</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="no" id={`${field.name}-alergias-no`} />
+                        <FormLabel htmlFor={`${field.name}-alergias-no`} className="font-normal">No</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -352,20 +348,18 @@ export default function NuevoClientePage() {
               
               <FormField control={form.control} name="medicamentosActuales" render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>¿Está tomando algún medicamento actualmente?</FormLabel>
+                  <FormLabel htmlFor={`${field.name}-group`}>¿Está tomando algún medicamento actualmente?</FormLabel>
                   <FormControl>
-                    <div>
-                      <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                           <RadioGroupItem value="si" id={`${field.name}-medicamentos-si`} />
-                          <FormLabel htmlFor={`${field.name}-medicamentos-si`} className="font-normal">Sí</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <RadioGroupItem value="no" id={`${field.name}-medicamentos-no`} />
-                          <FormLabel htmlFor={`${field.name}-medicamentos-no`} className="font-normal">No</FormLabel>
-                        </FormItem>
-                      </RadioGroup>
-                    </div>
+                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col space-y-1" id={`${field.name}-group`}>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                         <RadioGroupItem value="si" id={`${field.name}-medicamentos-si`} />
+                        <FormLabel htmlFor={`${field.name}-medicamentos-si`} className="font-normal">Sí</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="no" id={`${field.name}-medicamentos-no`} />
+                        <FormLabel htmlFor={`${field.name}-medicamentos-no`} className="font-normal">No</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -374,28 +368,26 @@ export default function NuevoClientePage() {
               
               <FormField control={form.control} name="nivelActividadFisica" render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>Nivel de Actividad Física Previo</FormLabel>
+                  <FormLabel htmlFor={`${field.name}-group`}>Nivel de Actividad Física Previo</FormLabel>
                   <FormControl>
-                    <div>
-                      <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1 md:flex-row md:space-x-4 md:space-y-0">
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <RadioGroupItem value="ninguno" id={`${field.name}-ninguno`} />
-                          <FormLabel htmlFor={`${field.name}-ninguno`} className="font-normal">Ninguno</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                           <RadioGroupItem value="principiante" id={`${field.name}-principiante`} />
-                          <FormLabel htmlFor={`${field.name}-principiante`} className="font-normal">Principiante</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <RadioGroupItem value="intermedio" id={`${field.name}-intermedio`} />
-                          <FormLabel htmlFor={`${field.name}-intermedio`} className="font-normal">Intermedio</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <RadioGroupItem value="avanzado" id={`${field.name}-avanzado`} />
-                          <FormLabel htmlFor={`${field.name}-avanzado`} className="font-normal">Avanzado</FormLabel>
-                        </FormItem>
-                      </RadioGroup>
-                    </div>
+                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col space-y-1 md:flex-row md:space-x-4 md:space-y-0" id={`${field.name}-group`}>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="ninguno" id={`${field.name}-ninguno`} />
+                        <FormLabel htmlFor={`${field.name}-ninguno`} className="font-normal">Ninguno</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                         <RadioGroupItem value="principiante" id={`${field.name}-principiante`} />
+                        <FormLabel htmlFor={`${field.name}-principiante`} className="font-normal">Principiante</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="intermedio" id={`${field.name}-intermedio`} />
+                        <FormLabel htmlFor={`${field.name}-intermedio`} className="font-normal">Intermedio</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <RadioGroupItem value="avanzado" id={`${field.name}-avanzado`} />
+                        <FormLabel htmlFor={`${field.name}-avanzado`} className="font-normal">Avanzado</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -575,7 +567,6 @@ export default function NuevoClientePage() {
   );
 
   if (!isClient) {
-    // Basic loading state to avoid rendering TooltipProvider on server
     return <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-4xl"><Card><CardHeader><CardTitle>Cargando...</CardTitle></CardHeader><CardContent><div className="min-h-[300px]"></div></CardContent></Card></div>;
   }
 
@@ -585,3 +576,4 @@ export default function NuevoClientePage() {
     </TooltipProvider>
   );
 }
+
