@@ -7,11 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { PlusCircle, Search, Filter, UserX, UserCheck, Hourglass } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from "next/link"; // Importar Link
 
 
 interface Client {
@@ -53,7 +51,6 @@ export default function ClientesPage() {
     expirado: true,
     pendiente: true,
   });
-  const [isAddClientDialogOpen, setIsAddClientDialogOpen] = useState(false);
 
   const filteredClients = useMemo(() => {
     return mockClients.filter(client =>
@@ -65,22 +62,6 @@ export default function ClientesPage() {
   const handleStatusFilterChange = (status: Client["membershipStatus"]) => {
     setStatusFilter(prev => ({ ...prev, [status]: !prev[status] }));
   };
-
-  const handleAddClientSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const newClient = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      plan: formData.get('plan') as string,
-    };
-    console.log("Nuevos datos del cliente:", newClient);
-    // Here you would typically add the new client to your state or send to an API
-    // For now, just an alert and close dialog
-    alert(`Cliente "${newClient.name}" añadido con plan "${newClient.plan}" (simulación).`);
-    setIsAddClientDialogOpen(false);
-  };
-
 
   return (
     <div className="flex flex-col gap-6">
@@ -120,52 +101,11 @@ export default function ClientesPage() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Dialog open={isAddClientDialogOpen} onOpenChange={setIsAddClientDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" /> Añadir Nuevo Cliente
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Añadir Nuevo Cliente</DialogTitle>
-                  <DialogDescription>
-                    Completa los datos para registrar un nuevo cliente.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleAddClientSubmit}>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="name" className="text-right">Nombre</Label>
-                      <Input id="name" name="name" className="col-span-3" required />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="email" className="text-right">Email</Label>
-                      <Input id="email" name="email" type="email" className="col-span-3" required />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="plan" className="text-right">Plan</Label>
-                      <Select name="plan" required>
-                        <SelectTrigger className="col-span-3">
-                          <SelectValue placeholder="Selecciona un plan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="basico">Básico</SelectItem>
-                          <SelectItem value="premium">Premium</SelectItem>
-                          <SelectItem value="anual">Anual</SelectItem>
-                          <SelectItem value="mensual">Mensual</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {/* Podrías añadir más campos aquí, como fecha de inicio de membresía, etc. */}
-                  </div>
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setIsAddClientDialogOpen(false)}>Cancelar</Button>
-                    <Button type="submit">Guardar Cliente</Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button asChild>
+              <Link href="/clientes/nuevo">
+                <PlusCircle className="mr-2 h-4 w-4" /> Añadir Nuevo Cliente
+              </Link>
+            </Button>
           </div>
 
           <div className="rounded-md border">
