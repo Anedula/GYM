@@ -380,41 +380,49 @@ export default function NuevoClientePage() {
                   <FormMessage />
                 </FormItem>
               )}/>
-              <FormField control={form.control} name="objetivosGimnasio" render={() => (
-                <FormItem>
-                  <div className="mb-4">
-                    <FormLabel className="text-base">Objetivos Principales en el Gimnasio</FormLabel>
-                    <FormDescription> Selecciona uno o más objetivos. </FormDescription>
-                  </div>
-                  {objectivesList.map((item) => (
-                    <FormField key={item.id} control={form.control} name="objetivosGimnasio" render={({ field }) => {
-                      return (
-                        <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
+              <FormField
+                control={form.control}
+                name="objetivosGimnasio"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="mb-4">
+                      <FormLabel className="text-base">Objetivos Principales en el Gimnasio</FormLabel>
+                      <FormDescription>Selecciona uno o más objetivos.</FormDescription>
+                    </div>
+                    <FormControl>
+                       {/* This div is the single child for FormControl, ensuring Slot works correctly. */}
+                      <div>
+                        {objectivesList.map((item) => (
+                          <FormItem
+                            key={item.id}
+                            className="flex flex-row items-start space-x-3 space-y-0 mb-2"
+                          >
                             <Checkbox
                               checked={field.value?.includes(item.id)}
                               onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...(field.value || []), item.id])
-                                  : field.onChange(
-                                      (field.value || []).filter(
-                                        (value) => value !== item.id
-                                      )
-                                    )
+                                const newValue = checked
+                                  ? [...(field.value || []), item.id]
+                                  : (field.value || []).filter(
+                                      (value) => value !== item.id
+                                    );
+                                field.onChange(newValue);
                               }}
                               id={`objetivo-${item.id}`}
                             />
-                          </FormControl>
-                          <FormLabel htmlFor={`objetivo-${item.id}`} className="font-normal">
-                            {item.label}
-                          </FormLabel>
-                        </FormItem>
-                      )
-                    }} />
-                  ))}
-                  <FormMessage />
-                </FormItem>
-              )}/>
+                            <FormLabel
+                              htmlFor={`objetivo-${item.id}`}
+                              className="font-normal"
+                            >
+                              {item.label}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField control={form.control} name="objetivosOtros" render={({ field }) => ( <FormItem> <FormLabel>Otros Objetivos (Opcional)</FormLabel> <FormControl> <Textarea placeholder="Si tienes otros objetivos, especifícalos aquí..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             </CardContent>
           </Card>
@@ -476,7 +484,7 @@ export default function NuevoClientePage() {
           <CardTitle className="text-2xl">Registrar Nuevo Cliente</CardTitle>
           <div className="flex items-center justify-center space-x-2 sm:space-x-4 my-4">
             {STEPS_CONFIG.map((step, index) => (
-              <div key={step.id} className="flex items-center">
+              <div key={step.id} className="flex items-center gap-2 sm:gap-4">
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
@@ -487,16 +495,15 @@ export default function NuevoClientePage() {
                   >
                     {currentStep > step.id || (currentStep === STEPS_CONFIG.length && step.id !== STEPS_CONFIG.length) ? <Check className="h-5 w-5" /> : step.id}
                   </div>
-                  <p className={cn(
-                      "text-xs mt-1 text-center",
-                      currentStep === step.id ? "text-primary" : "text-muted-foreground"
-                    )}
+                  <p className={
+                      `text-xs mt-1 text-center ${currentStep === step.id ? "text-primary" : "text-muted-foreground"}`
+                    }
                   >
                     {step.name}
                   </p>
                 </div>
                 {index < STEPS_CONFIG.length - 1 && (
-                  <ChevronsRight className="h-6 w-6 text-muted-foreground mx-2 sm:mx-4" />
+                  <ChevronsRight className="h-6 w-6 text-muted-foreground" />
                 )}
               </div>
             ))}
@@ -540,7 +547,6 @@ export default function NuevoClientePage() {
   );
 
   if (!isClient) {
-    // Return basic page content or a loader during SSR or before client-side hydration
     return pageContent;
   }
 
@@ -550,3 +556,4 @@ export default function NuevoClientePage() {
     </TooltipProvider>
   );
 }
+
